@@ -1,0 +1,74 @@
+{
+	"name": "Newочём",
+	"description": "Мы переводим и озвучиваем всё самое интересное, что появляется в зарубежном Интернете.",
+	"image": "./img/logo.png",
+	"email": "go@newochem.io",
+	"startDate": "20 сентября 2017",
+	"projectLinks": [
+		{"name": "VK", "link": "https://vk.com/newochem"},
+		{"name": "Facebook", "link": "https://www.facebook.com/newochem/"},
+		{"name": "Twitter", "link": "https://twitter.com/TheNewochem"},
+		{"name": "Telegram", "link": "https://t.me/newochem"}
+	],
+	"listenLinks": [
+		{
+			"name": "Apple Podcasts",
+			"icon": "apple",
+			"link": "https://itunes.apple.com/ru/podcast/new%D0%BE%D1%87%D1%91%D0%BC/id1287567883?mt=2"
+		},
+		{
+			"name": "Яндекс Музыка",
+			"icon": "yandex",
+			"link": "https://music.yandex.ru/album/6316997"
+		},
+		{
+			"name": "Сastbox",
+			"icon": "castbox",
+			"link": "https://podcasts.google.com/?feed=aHR0cHM6Ly9wb2RzdGVyLmZtL3Jzcy54bWw_cGlkPTQ4Mjkx"
+		},
+		{"name": "VK", "icon": "vk", "link": "https://vk.com/podcasts-80512191"},
+		{
+			"name": "YouTube",
+			"icon": "youtube",
+			"link": "https://www.youtube.com/channel/UCmSJlQptWjgSbd7jJEBdlvg/videos"
+		},
+		{
+			"name": "Google Podcasts",
+			"icon": "google",
+			"link": "https://podcasts.google.com/?feed=aHR0cHM6Ly9wb2RzdGVyLmZtL3Jzcy54bWw_cGlkPTQ4Mjkx"
+		},
+		{
+			"name": "Telegram",
+			"icon": "telegram",
+			"link": "https://t.me/newochem"
+		},
+		{
+			"name": "Pocket Cast",
+			"icon": "pocketcast",
+			"link": "https://pca.st/itunes/1287567883"
+		},
+		{
+			"name": "Spotify",
+			"icon": "spotify",
+			"link": "https://open.spotify.com/show/2uSuFhKjLTjraPWdZUAu28"
+		},
+		{
+			"name": "TuneIn",
+			"icon": "tunein",
+			"link": "https://tunein.com/podcasts/Education-Podcasts/New-Why-p1176566/"
+		},
+
+		{
+			"name": "Player FM",
+			"icon": "playerfm",
+			"link": "https://player.fm/series/new-1543723"
+		},
+		{
+			"name": "RSS",
+			"icon": "rss",
+			"link": "https://podster.fm/rss.xml?pid=48291"
+		}
+	],
+	"fullDescription": "<strong>Суть проекта:</strong> <br> Mы ищем самое интересное чтиво в зарубежном интернете. Делаем подборки из пяти статей с краткими описаниями и публикуем их во <a target=\\\"_blank\\\" href=\\\"https://newochem.io/vk\\\">ВКонтакте</a>&nbsp;и&nbsp;<a target=\\\"_blank\\\" href=\\\"https://newochem.io/tg\\\">Телеграме</a> . Вы голосуете за понравившиеся, а мы рерайтим и озвучиваем две, набравшие больше всего голосов.",
+	"mediakitLink": "/files/newochem_mediakit.pdf"
+}
