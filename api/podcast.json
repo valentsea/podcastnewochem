@@ -5,10 +5,25 @@
 	"email": "go@newochem.io",
 	"startDate": "20 сентября 2017",
 	"projectLinks": [
-		{"name": "VK", "link": "https://vk.com/newochem"},
-		{"name": "Facebook", "link": "https://www.facebook.com/newochem/"},
-		{"name": "Twitter", "link": "https://twitter.com/TheNewochem"},
-		{"name": "Telegram", "link": "https://t.me/newochem"}
+		{"name": "Site", "icon": "share-site", "link": "https://newochem.io"},
+		{"name": "Telegram", "icon": "share-tg", "link": "https://t.me/newochem"},
+
+		{"name": "VK", "icon": "share-vk", "link": "https://vk.com/newochem"},
+		{
+			"name": "Facebook",
+			"icon": "share-fb",
+			"link": "https://www.facebook.com/newochem/"
+		},
+		{
+			"name": "Twitter",
+			"icon": "share-tw",
+			"link": "https://twitter.com/TheNewochem"
+		},
+		{
+			"name": "Newsletter",
+			"icon": "newsletter",
+			"link": "https://newochem.io/newsletter"
+		}
 	],
 	"listenLinks": [
 		{
@@ -69,6 +84,6 @@
 			"link": "https://podster.fm/rss.xml?pid=48291"
 		}
 	],
-	"fullDescription": "<strong>Суть проекта:</strong> <br> Mы ищем самое интересное чтиво в зарубежном интернете. Делаем подборки из пяти статей с краткими описаниями и публикуем их во <a target=\\\"_blank\\\" href=\\\"https://newochem.io/vk\\\">ВКонтакте</a>&nbsp;и&nbsp;<a target=\\\"_blank\\\" href=\\\"https://newochem.io/tg\\\">Телеграме</a> . Вы голосуете за понравившиеся, а мы рерайтим и озвучиваем две, набравшие больше всего голосов.",
+	"fullDescription": "<strong>Суть проекта</strong> <br> Mы ищем самое интересное чтиво в зарубежном интернете. Делаем подборки из пяти статей с краткими описаниями и публикуем их во <a target=\\\"_blank\\\" href=\\\"https://newochem.io/vk\\\">ВКонтакте</a>&nbsp;и&nbsp;<a target=\\\"_blank\\\" href=\\\"https://newochem.io/tg\\\">Телеграме</a> . Вы голосуете за понравившиеся, а мы рерайтим и озвучиваем две, набравшие больше всего голосов.",
 	"mediakitLink": "/files/newochem_mediakit.pdf"
 }

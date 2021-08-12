@@ -46,6 +46,7 @@
       </div>
     </div>
   </div>
+
   <div class="container">
     <div class="page">
       <div class="left-block">
@@ -54,8 +55,14 @@
           :class="isMinimizedInfo ? 'info-minimized' : ''"
         >
           <div class="info-block__img" v-show="!isMinimizedInfo">
-            <img :src="podcast.image" width="200" :alt="podcast.title" />
+            <img
+              :src="podcast.image"
+              width="200"
+              height="53"
+              :alt="podcast.title"
+            />
           </div>
+
           <div class="info-block__main" v-show="!isMinimizedInfo">
             <p v-html="podcast.description"></p>
           </div>
@@ -81,6 +88,20 @@
               </span>
             </span>
           </div>
+          <template v-if="podcast.projectLinks">
+            <div class="info-block__social social" v-show="!isMinimizedInfo">
+              <template v-for="link in podcast.projectLinks" :key="link.name">
+                <a
+                  class="social__link"
+                  :href="link.link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <addSVG :icon="link.icon" />
+                </a>
+              </template>
+            </div>
+          </template>
         </div>
 
         <div class="listen" v-show="!isMinimizedInfo">
@@ -156,6 +177,19 @@
             >.
           </span>
         </div>
+        <button
+          class="more-info"
+          v-if="!isMobile"
+          @click="isMinimizedInfo = !isMinimizedInfo"
+          :style="
+            isMinimizedInfo
+              ? 'margin-left: auto;top: -85px; margin-bottom: 0;'
+              : ''
+          "
+        >
+          <template v-if="isMinimizedInfo"> Развернуть </template>
+          <template v-if="!isMinimizedInfo"> Свернуть </template>
+        </button>
         <div
           class="playlist-block"
           ref="playlistBlock"
@@ -170,20 +204,18 @@
                 type="text"
                 placeholder="Название плейлиста"
                 class="playlist__heading"
-                :class="savePlaylistLineActive ? 'active' : ''"
-                :disabled="!savePlaylistLineActive"
                 v-on:keyup.enter="savePlaylist"
               />
 
               <span
-                class="playlist__save"
+                class="playlist__save nowrap"
                 v-if="savePlaylistLineActive"
                 @click="savePlaylist"
                 >Сохранить</span
               >
 
               <div class="playlist__btns" v-if="playlist.length > 0">
-                <span v-if="!savePlaylistLineActive">
+                <span v-if="!savePlaylistLineActive && playlist.length > 1">
                   <addSVG
                     icon="shuffle"
                     :clickIcon="shufflePlaylist"
@@ -202,14 +234,17 @@
                     icon="save"
                     :clickIcon="toggleSavePlaylistLine"
                     :showIconIf="!savePlaylistLineActive"
-                    iconClass="playlist__shuffle"
+                    iconClass="playlist__save-btn"
                   />
                   <addSVG
                     icon="close"
                     :clickIcon="toggleSavePlaylistLine"
                     :showIconIf="savePlaylistLineActive"
-                    iconClass="playlist__shuffle"
+                    iconClass="playlist__save-btn"
                   />
+                </span>
+                <span v-if="!savePlaylistLineActive">
+                  <addSVG icon="share" iconClass="playlist__shuffle" />
                 </span>
                 <span v-if="isMobile && !savePlaylistLineActive">
                   <addSVG
@@ -220,10 +255,7 @@
                 </span>
               </div>
             </div>
-            <div
-              class="playlist__save-wrapper"
-              v-if="savePlaylistLineActive"
-            ></div>
+
             <div class="playlist__tracklist">
               <template v-if="playlist.length != 0">
                 <draggable v-model="playlist" :sort="true" handle=".handle">
@@ -399,6 +431,15 @@
         </div>
         <div class="tracks__buttons">
           <button
+            v-if="showEpisodes && sharedTrack"
+            @click="viewAll()"
+            class="nowrap"
+            style="padding: 10px"
+          >
+            <addSVG icon="arrow-left" />
+            Ко всем эпизодам
+          </button>
+          <button
             class="random-episode"
             @click="playRandomEpisode"
             ref="randomBtn"
@@ -523,7 +564,93 @@
                   <addSVG icon="hashtag" />
                   <span class="nowrap"> Описание </span>
                 </span>
+                <span
+                  class="subline__item episode__share share"
+                  @click="toggleShare(item.id)"
+                  :class="{
+                    episode__about_active: openedShare.includes(item.id),
+                  }"
+                >
+                  <addSVG icon="share" />
+                  <span class="nowrap">
+                    <template v-if="!isMobile"> Поделиться </template>
+                  </span>
+                </span>
               </div>
+            </div>
+            <div class="share__links" v-if="openedShare.includes(item.id)">
+              <a
+                class="subline__item interactive"
+                :href="
+                  'https://t.me/share/url?url=' +
+                  siteURL +
+                  '?ep=' +
+                  item.id +
+                  '&amp;text=' +
+                  encodeURI(item.title)
+                "
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <addSVG icon="share-tg" />
+
+                Telegram</a
+              >
+              <a
+                class="subline__item interactive"
+                :href="
+                  'http://vk.com/share.php?url=' +
+                  siteURL +
+                  '?ep=' +
+                  item.id +
+                  '&amp;tittle=' +
+                  encodeURI(item.title)
+                "
+                target="_blank"
+              >
+                <addSVG icon="share-vk" />
+
+                VK</a
+              >
+              <a
+                class="subline__item interactive"
+                :href="
+                  'https://www.facebook.com/sharer/sharer.php?u=' +
+                  siteURL +
+                  '?ep=' +
+                  item.id +
+                  '&amp;t=' +
+                  encodeURI(item.title)
+                "
+                target="_blank"
+              >
+                <addSVG icon="share-fb" />
+
+                Facebook</a
+              >
+              <a
+                class="subline__item interactive"
+                :href="
+                  'https://twitter.com/intent/tweet?text=' +
+                  encodeURI(item.title) +
+                  '%20' +
+                  siteURL +
+                  '?ep=' +
+                  item.id
+                "
+                target="_blank"
+              >
+                <addSVG icon="share-tw" />
+
+                Twitter</a
+              >
+              <span
+                @click="copy(siteURL + '?ep=' + item.id, $event.target)"
+                class="copy-el subline__item interactive"
+                ><addSVG icon="copy" /><span class="text">
+                  Скопировать ссылку</span
+                ></span
+              >
             </div>
             <!-- <transition name="fade"> -->
             <div
@@ -532,9 +659,9 @@
             >
               <div class="episode__description-text">
                 <div class="episode__description-header">
-                  <span class="episode__description-heading">Описание</span>
-                  <span class="episode__date">
-                    Дата выхода: {{ formatDate(item.pubDate) }}
+                  <!-- <span class="episode__description-heading">Описание</span> -->
+                  <span class="episode__date"
+                    >Вышел {{ formatDate(item.pubDate) }}
                   </span>
                 </div>
                 <div v-html="formatDescriprion(item.description)"></div>
@@ -546,10 +673,19 @@
                 </div>
               </div>
             </div>
+
             <!-- </transition> -->
             <div class="episode__menu">
               <addSVG icon="three-dots" />
               <div class="episode__submenu">
+                <button
+                  class="episode__download button"
+                  @click="showSharedTrack(item.id)"
+                >
+                  <addSVG icon="open" /><span class="nowrap"
+                    >Открыть выпуск</span
+                  >
+                </button>
                 <a
                   :href="item.enclosure.url"
                   :download="item.title"
@@ -574,11 +710,18 @@
           <div class="nothing">Загрузка...</div>
         </template>
         <div
-          v-if="nextPage && showEpisodes"
+          v-if="nextPage && showEpisodes && !sharedTrack"
           class="tracks__loadmore"
           @click="loadmore()"
         >
           Загрузить ещё
+        </div>
+        <div
+          v-if="showEpisodes && sharedTrack"
+          class="tracks__loadmore"
+          @click="viewAll()"
+        >
+          Показать все эпизоды
         </div>
       </div>
     </div>
@@ -603,11 +746,18 @@
             ></div>
             <div
               class="zPlayer__progress-overflow"
+              ref="progressOverflow"
               @mousedown="moveTo"
               @mouseup="closeMousepress"
               @mousemove="progressMouseOver"
               @mouseleave="hideProgressMouseOver"
             ></div>
+            <div class="zPlayer__time">
+              {{ zPlayer.time > 0 ? toHHMMSS(zPlayer.time) : "" }}
+            </div>
+            <div class="zPlayer__duration">
+              {{ zPlayer.duration > 0 ? toHHMMSS(zPlayer.duration) : "" }}
+            </div>
             <div
               class="zPlayer__buffered"
               :style="{
@@ -646,6 +796,12 @@
               <addSVG icon="next-track" />
             </div>
             <div class="zPlayer__title">{{ this.zPlayer.title }}</div>
+            <div
+              class="zPlayer__open"
+              @click="showSharedTrack(this.zPlayer.id)"
+            >
+              <addSVG icon="open" />
+            </div>
           </div>
           <div class="zPlayer__main-right">
             <div class="zPlayer__speed" @click="zPlayerChangeSpeed">
@@ -660,7 +816,13 @@
                 }"
               ></div>
 
-              <div class="zPlayer__volume-overflow" @click="volumeTo"></div>
+              <div
+                class="zPlayer__volume-overflow"
+                @mousedown="volumeTo"
+                @mouseup="volumeMouseLeave"
+                @mousemove="volumeMouseOver"
+                @mouseleave="volumeMouseLeave"
+              ></div>
               <div
                 v-if="zPlayer.mouseOverShow"
                 class="zPlayer__volume-overflow-persentage"
@@ -668,11 +830,14 @@
                   left: zPlayer.mouseOverTimePx + 'px',
                 }"
               ></div>
+
+              <addSVG
+                icon="nosound"
+                iconClass="zPlayer__nosound"
+                :showIconIf="zPlayer.volume == 0"
+              />
             </div>
 
-            <div class="zPlayer__time">
-              {{ toHHMMSS(zPlayer.time) }}<br />{{ toHHMMSS(zPlayer.duration) }}
-            </div>
             <div
               v-if="playlistActive && isMobile"
               class="zPlayer__playlist"
@@ -686,7 +851,7 @@
       </div>
       <div id="player"></div>
     </div>
-    <div class="mobile-menu" v-if="isMobile">
+    <div class="mobile-menu" v-show="isMobile">
       <div class="mobile-menu__item" @click="openMobileAbout" ref="aboutTab">
         <addSVG icon="about-tab" />
 
@@ -741,6 +906,9 @@ export default {
       podcast: podcastJSON,
       episodes: [],
       // episodes: episodesJSON.episodes,
+      siteURL: window.location.origin,
+      URLData: null,
+      sharedTrack: null,
       showPlaylists: false,
       showEpisodes: true,
       player: null,
@@ -781,6 +949,7 @@ export default {
         mouseOverShow: false,
         mouseOverTime: null,
         mouseOverPx: null,
+        clientX: null,
         isPlaying: false,
         volume: 0.8,
         speed: 1,
@@ -788,6 +957,7 @@ export default {
       },
       podcastDisplayedEpisodes: [],
       openedDescriptions: [],
+      openedShare: [],
       isSearchActive: false,
       searchText: "",
       searchResults: [],
@@ -800,6 +970,7 @@ export default {
       page: 1,
       nextPage: false,
       mousepress: false,
+      mousepressVolume: false,
       playlist: [],
       playlistDuration: 0,
       userPlaylists: [],
@@ -812,21 +983,13 @@ export default {
       windowWidth: window.innerHeight,
       scrollY: 0,
       isMobile: false,
-      playlistName: "Плейлист",
+      playlistName: "",
       savePlaylistLineActive: false,
     };
   },
   created() {},
   mounted() {
-    this.checkIsMobile();
-    this.addStopOnSpaceListener();
     this.setPropFromLocalStorage("episodes");
-    this.setPropFromLocalStorage("userPlalists");
-    this.setPropFromLocalStorage("zPlayer");
-    if (this.episodes.length) {
-      this.addPlayerJS();
-      this.paging();
-    }
     fetch("https://podcast.newochem.io/api/episodes")
       .then((response) => {
         return response.json();
@@ -846,6 +1009,18 @@ export default {
         console.log(err);
         this.addPlayerJS();
       });
+    this.checkIsMobile();
+
+    this.URLData = Object.fromEntries(
+      new URL(window.location).searchParams.entries()
+    );
+
+    this.setPropFromLocalStorage("userPlalists");
+    this.setPropFromLocalStorage("zPlayer");
+    if (this.episodes.length) {
+      this.addPlayerJS();
+      this.paging();
+    }
 
     window.onresize = () => {
       this.checkIsMobile();
@@ -853,17 +1028,58 @@ export default {
     window.onscroll = () => {
       this.scrollY = window.scrollY;
     };
+    // this.addStopOnSpaceListener();
   },
   watch: {
+    player: {
+      handler(newVal, oldVal) {
+        if (newVal && this.URLData.playlist) {
+          this.playPlylst(this.URLData.playlist.split("-"), "", false);
+          this.playlistName = decodeURI(this.URLData.playlistName);
+          if (this.isMobile) {
+            this.openMobileAbout();
+          }
+        }
+        // if (this.sharedTrack) {
+        //   this.player.api("play", "id:" + this.sharedTrack.id);
+        // }
+      },
+      deep: true,
+    },
     episodes: {
       handler(newVal, oldVal) {
         localStorage.setItem("episodes", JSON.stringify(newVal));
+
+        if (this.URLData.ep) {
+          this.sharedTrack = this.episodes.find((x) => x.id == this.URLData.ep);
+          this.showSharedTrack();
+        }
       },
       deep: true,
     },
     playlist: {
       handler: function () {
         this.countPlaylistDuration();
+        let IDsInPlaylist = this.playlist.map((track) => {
+          return track.id;
+        });
+        window.history.pushState(
+          null,
+          document.title,
+          `${window.location.pathname}?playlist=${IDsInPlaylist.join(
+            "-"
+          )}&playlistName=${encodeURI(this.playlistName)}`
+        );
+      },
+      deep: true,
+    },
+    playlistName: {
+      handler: function (newVal) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set("playlistName", newVal);
+        const url = new URL(location);
+        url.search = urlParams;
+        history.replaceState(null, document.title, url);
       },
       deep: true,
     },
@@ -880,7 +1096,7 @@ export default {
       deep: true,
     },
     isMobile(newVal, oldVal) {
-      if (newVal == true) {
+      if (newVal == true && !this.sharedTrack) {
         this.openMobileAbout();
       } else {
         this.openMobileEpisodes();
@@ -890,9 +1106,13 @@ export default {
   methods: {
     countPlaylistDuration() {
       this.playlistDuration = 0;
-      this.playlist.forEach((ep) => {
-        this.playlistDuration += ep.duration;
-      });
+      if (this.playlist.length) {
+        this.playlist.forEach((ep) => {
+          if (ep) {
+            this.playlistDuration += ep.duration;
+          }
+        });
+      }
     },
     checkIsMobile() {
       this.windowWidth = window.innerWidth;
@@ -915,6 +1135,10 @@ export default {
       });
 
       this.playerNode = document.getElementById("player");
+
+      this.playerNode.removeAttribute("style");
+      document.querySelector("pjsdiv").remove();
+
       this.zPlayerInit();
     },
     zPlayerInit() {
@@ -926,15 +1150,23 @@ export default {
         this.zPlayer.title = this.player.api("playlist_title");
         this.zPlayer.duration = 0;
         this.player.api("volume", this.zPlayer.volume);
+        let index = this.openedShare.indexOf(this.zPlayer.id);
+        if (index == -1) {
+          this.openedShare = [];
+          this.openedShare.push(this.zPlayer.id);
+        }
         this.playerNode.addEventListener("duration", (e) => {
           this.zPlayer.duration = e.info;
         });
+        document.title = this.zPlayer.title;
       });
 
       this.playerNode.addEventListener("play", () => {
         this.zPlayer.isPlaying = true;
         this.playerNode.addEventListener("time", (e) => {
-          this.zPlayer.time = this.player.api("time");
+          if (!this.mousepress) {
+            this.zPlayer.time = this.player.api("time");
+          }
           this.zPlayer.buffered = this.player.api("buffered");
 
           if (
@@ -1002,6 +1234,15 @@ export default {
       this.page++;
       this.paging();
     },
+    viewAll() {
+      this.sharedTrack = null;
+      this.paging();
+      const url = new URL(location);
+      url.searchParams.delete("ep");
+      history.replaceState(null, document.title, url);
+      this.openedDescriptions = [];
+      this.openedShare = [];
+    },
     getLastNumber(number) {
       return number.toString().split("").pop();
     },
@@ -1040,6 +1281,45 @@ export default {
         this.openedDescriptions.push(id);
       } else {
         this.openedDescriptions.splice(index, 1);
+      }
+    },
+    toggleShare(id) {
+      let index = this.openedShare.indexOf(id);
+      if (index == -1) {
+        this.openedShare.push(id);
+      } else {
+        this.openedShare.splice(index, 1);
+      }
+    },
+    showSharedTrack(id) {
+      if (id) {
+        this.sharedTrack = this.episodes.find((x) => x.id == id);
+      }
+      if (this.sharedTrack) {
+        this.scrollToTop();
+
+        this.podcastDisplayedEpisodes = [this.sharedTrack];
+
+        let index = this.openedDescriptions.indexOf(this.sharedTrack.id);
+        if (index == -1) {
+          this.openedDescriptions.push(this.sharedTrack.id);
+        }
+        index = this.openedShare.indexOf(this.sharedTrack.id);
+        if (index == -1) {
+          this.openedShare.push(this.sharedTrack.id);
+        }
+
+        if (this.isMobile) {
+          this.openMobileEpisodes();
+        }
+
+        if (!this.URLData.ep && id) {
+          const urlParams = new URLSearchParams(window.location.search);
+          urlParams.set("ep", id);
+          const url = new URL(location);
+          url.search = urlParams;
+          history.replaceState(null, document.title, url);
+        }
       }
     },
     toggleSearch() {
@@ -1251,6 +1531,10 @@ export default {
     },
     hideProgressMouseOver() {
       this.zPlayer.mouseOverShow = false;
+      if (this.mousepress) {
+        this.player.api("seek", this.zPlayer.time);
+        this.mousepress = false;
+      }
     },
     progressMouseOver(e) {
       this.zPlayer.mouseOverShow = true;
@@ -1261,25 +1545,46 @@ export default {
       let percentage = (x * 100) / rect.width;
       let seconds = (this.zPlayer.duration * percentage) / 100;
       this.zPlayer.mouseOverTime = seconds;
+
+      if (this.mousepress) {
+        this.zPlayer.time = seconds;
+      }
     },
     closeMousepress() {
       this.mousepress = false;
+      this.player.api("seek", this.zPlayer.time);
     },
     moveTo(e) {
+      this.mousepress = true;
+      this.clientX = e.clientX;
       let rect = e.target.getBoundingClientRect();
-      let x = Math.abs(e.clientX - rect.left); //x position within the element.
+      // let rect = this.$refs.progressOverflow.getBoundingClientRect();
+      let x = Math.abs(this.clientX - rect.left); //x position within the element.
       let percentage = (x * 100) / rect.width;
       let seconds = (this.zPlayer.duration * percentage) / 100;
+
       this.zPlayer.time = seconds;
-      this.player.api("seek", seconds);
     },
     volumeTo(e) {
-      // e = Mouse click event.
+      this.mousepressVolume = true;
       let rect = e.target.getBoundingClientRect();
       let x = Math.abs(e.clientX - rect.left); //x position within the element.
       let volume = x / rect.width;
-      this.zPlayer.volume = volume;
-      this.player.api("volume", volume);
+      this.zPlayer.volume = volume > 0.1 ? volume : 0;
+    },
+    volumeMouseOver(e) {
+      if (this.mousepressVolume) {
+        let rect = e.target.getBoundingClientRect();
+        let x = Math.abs(e.clientX - rect.left); //x position within the element.
+        let volume = x / rect.width;
+        this.zPlayer.volume = volume > 0.1 ? volume : 0;
+      }
+    },
+    volumeMouseLeave() {
+      if (this.mousepressVolume) {
+        this.player.api("volume", this.zPlayer.volume);
+        this.mousepressVolume = false;
+      }
     },
     zPlayerNextTrack() {
       if (!this.playlistActive) {
@@ -1306,21 +1611,17 @@ export default {
     },
     togglePlaylist() {
       this.playlistActive = !this.playlistActive;
+      window.history.replaceState(null, document.title, window.location.origin);
       if (!this.isMobile) {
         this.playlistVisible = true;
         this.isMinimizedInfo = false;
       }
-      // if (this.isMobile) {
-      //   this.isMinimizedInfo = !this.isMinimizedInfo;
-      // }
     },
     togglePlaylistVisibility() {
       this.playlistVisible = !this.playlistVisible;
     },
     addTrackInPlaylist(track) {
       this.playlist.push(track);
-
-      // this.episodeInPlaylist[track.id] = true;
     },
     shakePlaylistAnimation() {
       this.$refs.zplaylist.classList.toggle("jello-diagonal");
@@ -1384,7 +1685,7 @@ export default {
       this.showPlaylists = false;
       this.showEpisodes = true;
     },
-    playPlylst(arrIds = [], playlistTitle) {
+    playPlylst(arrIds = [], playlistTitle, play = true) {
       this.savePlaylistLineActive = false;
       this.playlistName = playlistTitle;
 
@@ -1395,7 +1696,9 @@ export default {
       arrIds.forEach((id) => {
         this.addTrackInPlaylist(this.episodes.find((x) => x.id == id));
       });
-      this.player.api("play", "id:" + this.playlist[0].id);
+      if (play) {
+        this.player.api("play", "id:" + this.playlist[0].id);
+      }
     },
     createCustomPlaylist() {
       this.playlistName = "Новый плейлист";
@@ -1416,10 +1719,9 @@ export default {
     toggleSavePlaylistLine() {
       this.savePlaylistLineActive = !this.savePlaylistLineActive;
       if (this.savePlaylistLineActive) {
-        this.playlistName = null;
-
         setTimeout(() => {
           this.$refs.playlistName.focus();
+          this.$refs.playlistName.select();
         }, 100);
       }
     },
@@ -1439,7 +1741,8 @@ export default {
       this.userPlaylists.unshift(newPlaylist);
       this.showPlaylists = true;
       this.showEpisodes = false;
-      this.toggleSavePlaylistLine();
+      this.savePlaylistLineActive = false;
+      this.$refs.playlistName.blur();
 
       if (this.isMobile) {
         // this.playlistVisible = !this.playlistVisible;
@@ -1509,6 +1812,27 @@ export default {
         this.$refs.email.textContent = email;
       }, 1000);
     },
+    copy(text, el) {
+      el = el.closest(".copy-el");
+      console.log(el);
+
+      var input = document.createElement("textarea");
+      input.innerHTML = text;
+      document.body.appendChild(input);
+      input.select();
+      var result = document.execCommand("copy");
+      document.body.removeChild(input);
+
+      if (el) {
+        let textNode = el.querySelector(".text");
+        console.log(textNode);
+        let oldText = textNode.textContent;
+        textNode.textContent = "Скопировано";
+        setTimeout(() => {
+          textNode.textContent = oldText;
+        }, 1000);
+      }
+    },
     scrollToTop() {
       window.scroll({
         top: 0,
@@ -1529,6 +1853,15 @@ export default {
         this[prop] = JSON.parse(localStorage.getItem(prop));
       }
     },
+    // deleteSharedTrack() {
+    //   this.sharedTrack = null;
+    //   this.playlistActive = !this.playlistActive;
+    //   window.history.replaceState(
+    //     null,
+    //     document.title,
+    //     `${window.location.origin}`
+    //   );
+    // },
   },
   computed: {
     mergeByID() {
@@ -1581,6 +1914,10 @@ export default {
     opacity: 1;
   }
 }
+@mixin button-effect-innactive {
+  opacity: 0.6;
+  transition: 0.3s;
+}
 
 @mixin unselectable {
   -webkit-touch-callout: none; /* iOS Safari */
@@ -1632,12 +1969,20 @@ button,
   transition: 0.3s;
   position: relative;
   overflow: hidden;
-
+  display: flex;
+  align-items: center;
   @include unselectable;
 
   &:hover {
     opacity: 1;
     background: var(--btn-hover-color);
+  }
+
+  svg {
+    width: 12px;
+    width: 12px;
+    fill: #fff;
+    margin-right: 2px;
   }
 }
 
@@ -1662,28 +2007,37 @@ button,
   width: 100%;
   padding-right: 10px;
   position: relative;
+  margin-bottom: 100px;
   @media (max-width: 768px) {
     padding-right: 0;
     max-width: 100%;
+    margin-bottom: 10px;
   }
 }
 
 .info-block {
-  padding: 20px 30px 24px;
+  padding: 20px 30px 60px 30px;
   height: fit-content;
   background: var(--block-bg);
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   border-radius: var(--block-border-radius);
   overflow: hidden;
   align-items: flex-start;
-  top: 30px;
+  position: relative;
+
+  &__social {
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 0;
+  }
 
   .button {
     margin-bottom: 0;
   }
 
   @media (max-width: 768px) {
-    padding: 20px 30px;
+    padding: 20px 30px 50px;
   }
 
   &__img {
@@ -1705,7 +2059,7 @@ button,
   background: var(--block-bg);
   border-radius: var(--block-border-radius);
   height: 44px;
-  padding: 10px 30px 10px 14px;
+  padding: 6px 30px 6px 14px;
 
   @media (max-width: 768px) {
     padding: 10px 30px;
@@ -2056,6 +2410,13 @@ button,
     top: 0px;
     border-radius: calc(var(--block-border-radius) / 4);
     border-top-right-radius: 0;
+
+    > a,
+    > span,
+    > div,
+    > button {
+      margin-bottom: 6px;
+    }
   }
 
   &__download {
@@ -2096,27 +2457,32 @@ button,
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: 0.3s;
-      opacity: 0.6;
+      @include button-effect-innactive;
+      // transition: 0.3s;
+      // opacity: 0.6;
 
-      &:hover {
-        opacity: 1;
-      }
+      // &:hover {
+      //   opacity: 1;
+      // }
     }
   }
 
   &__duration {
     margin-right: 16px;
+    @media (max-width: 768px) {
+      margin-right: 12px;
+    }
   }
 
   &__add-to-playlist {
     cursor: pointer;
     width: 160px;
-    background: black;
+    background: #000000;
     border-radius: calc(var(--block-border-radius) / 2);
     padding: 3px 10px;
     margin-right: 10px;
     text-align: center;
+    @include button-effect;
 
     @media (max-width: 768px) {
       margin: 5px 5px 5px 0;
@@ -2136,6 +2502,9 @@ button,
 
   &__listenings {
     margin-right: 6px;
+    @media (max-width: 768px) {
+      margin-right: 3px;
+    }
     svg {
       height: 13px;
       width: 13px;
@@ -2150,15 +2519,10 @@ button,
 
   &__about {
     cursor: pointer;
-    // border-radius: var(--block-border-radius);
     padding: 4px 10px;
-
-    // &:hover {
-    //   background: var(--site-bg);
-    // }
+    @include button-effect;
 
     &_active {
-      // background: var(--site-bg);
       opacity: 1 !important;
     }
 
@@ -2174,9 +2538,14 @@ button,
     }
   }
 
+  &__share {
+    position: relative;
+    @include button-effect;
+  }
+
   &__description {
     background: #100f13;
-    padding: 20px 20px 40px 60px;
+    padding: 20px 20px 40px 44px;
     border-radius: 10px;
     margin-bottom: 30px;
     margin-top: 10px;
@@ -2231,10 +2600,10 @@ button,
   }
 
   &__date {
-    border-left: solid 1px #ffffff18;
-    border-bottom: solid 1px #ffffff18;
-    border-bottom-left-radius: calc(var(--block-border-radius) / 2);
-    padding: 8px 12px;
+    // border-left: solid 1px #ffffff18;
+    // border-bottom: solid 1px #ffffff18;
+    // border-bottom-left-radius: calc(var(--block-border-radius) / 2);
+    // padding: 8px 12px;
     opacity: 0.5;
     font-size: 13px;
     @media (max-width: 768px) {
@@ -2247,6 +2616,10 @@ button,
   background: var(--selected-episode) !important;
 }
 
+.interactive {
+  @include button-effect;
+}
+
 .player {
   background: var(--block-bg);
   border-top-left-radius: var(--block-border-radius);
@@ -2257,6 +2630,7 @@ button,
   right: 0;
   width: 100%;
   overflow: hidden;
+  z-index: 999;
 }
 
 .player-mobile {
@@ -2267,6 +2641,47 @@ button,
   opacity: 0;
   height: 0px;
   min-height: 0px !important;
+}
+
+.share {
+  position: relative;
+  cursor: pointer;
+  svg {
+    margin-right: 3px;
+    height: 14px;
+    width: 14px;
+    fill: #fff !important;
+  }
+  &__links {
+    // margin-left: 30px;
+    margin-top: 4px;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    a,
+    > span {
+      padding: 6px 20px 6px 0;
+      z-index: 90;
+      text-decoration: none;
+      display: block;
+      white-space: nowrap;
+      display: flex;
+      font-size: 12px;
+      color: #fff;
+      cursor: pointer;
+
+      // &:first-child {
+      //   padding-left: 4px;
+      // }
+      svg {
+        height: 18px;
+        width: 18px;
+        fill: #fff !important;
+        margin-right: 6px;
+      }
+    }
+  }
 }
 
 .zPlayer {
@@ -2280,6 +2695,12 @@ button,
 
     &:hover {
       height: 20px;
+
+      .zPlayer__duration,
+      .zPlayer__time {
+        font-size: 12px;
+        top: 1px;
+      }
     }
   }
   &__main-block {
@@ -2289,7 +2710,7 @@ button,
     padding: 10px 26px;
 
     @media (max-width: 768px) {
-      padding: 12px 20px 16px;
+      padding: 12px 15px 12px;
     }
   }
   &__main-left {
@@ -2318,7 +2739,7 @@ button,
   &__title {
     font-size: 15px;
     font-weight: 500;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
     cursor: default;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -2337,6 +2758,26 @@ button,
     position: relative;
     border-top-left-radius: var(--block-border-radius);
     border-top-right-radius: var(--block-border-radius);
+  }
+
+  &__duration {
+    position: absolute;
+    right: 15px;
+    top: -2px;
+    font-size: 10px;
+    color: #e2e2e2;
+    font-weight: 600;
+    transition: 0.3s;
+  }
+  &__time {
+    position: absolute;
+    left: 15px;
+    top: -2px;
+    font-size: 10px;
+    color: #e2e2e2;
+    font-weight: 600;
+    transition: 0.3s;
+    @include unselectable;
   }
 
   &__progress-time {
@@ -2394,7 +2835,7 @@ button,
     }
   }
   &__volume {
-    background: rgb(87, 87, 87);
+    background: #5e5d5d;
     height: 100%;
   }
 
@@ -2408,7 +2849,38 @@ button,
     cursor: pointer;
   }
 
+  &__nosound {
+    position: absolute;
+    opacity: 0.5;
+    svg {
+      height: 24px;
+      width: 24px;
+      // margin-bottom: 3px;
+      fill: #fff;
+      // polygon,
+      // line,
+      path {
+        // stroke: #fff;
+        fill: #fff;
+      }
+    }
+  }
+
   &__volume-overflow-persentage {
+  }
+
+  &__open {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-left: 10px;
+    @include button-effect;
+    svg {
+      height: 16px;
+      width: 16px;
+      // margin-bottom: 3px;
+      fill: #fff;
+    }
   }
 
   &__playlist {
@@ -2434,16 +2906,6 @@ button,
     @include button-effect;
     @include unselectable;
   }
-
-  &__time {
-    margin-left: 15px;
-    font-weight: 600;
-    font-size: 11px;
-    cursor: default;
-    text-align: right;
-    @include button-effect;
-    @include unselectable;
-  }
 }
 .sortable-chosen {
   opacity: 0;
@@ -2454,7 +2916,7 @@ button,
   font-size: 11px;
   opacity: 0.3;
   transition: opacity 0.3s;
-
+  padding-bottom: 10px;
   &:hover {
     opacity: 1;
   }
@@ -2592,8 +3054,8 @@ button,
     padding: 6px 10px;
     // margin-right: 10px;
     outline: none;
-    border: 1px solid transparent;
-    border-radius: var(--block-border-radius);
+    // border: 1px solid transparent;
+    // border-radius: var(--block-border-radius);
     flex: auto;
   }
 
@@ -2615,6 +3077,7 @@ button,
   }
 
   &__shuffle,
+  &__save-btn,
   &__close {
     cursor: pointer;
     padding: 0 3px;
@@ -2633,6 +3096,12 @@ button,
       fill: #fff;
       width: 21px;
       height: 21px;
+    }
+  }
+  &__save-btn {
+    svg {
+      width: 20px;
+      height: 20px;
     }
   }
 
@@ -2721,10 +3190,6 @@ button,
     margin-bottom: 8px;
   }
 
-  &__save-wrapper {
-    margin: 10px 0 14px;
-  }
-
   &__save {
     cursor: pointer;
     font-size: 12px;
@@ -2749,8 +3214,10 @@ button,
     .playlist-track__remove {
       opacity: 0.4;
     }
-    .playlist-track__duration {
-      opacity: 0;
+    @media (min-width: 768px) {
+      .playlist-track__duration {
+        opacity: 0;
+      }
     }
   }
 
@@ -2780,7 +3247,9 @@ button,
     text-align: right;
     opacity: 0;
     transition: 0.3s;
-    margin-left: 10px;
+    z-index: 99;
+    // margin-left: 10px;
+    padding: 1px 5px;
     @media (max-width: 768px) {
       opacity: 0.2;
     }
@@ -2946,6 +3415,7 @@ button,
   display: flex;
   flex-wrap: wrap;
   margin-bottom: 10px;
+  margin-top: 18px;
   position: relative;
   &__link {
     // width: 50%;
@@ -2985,10 +3455,12 @@ button,
   }
 
   &__more {
-    // position: absolute;
-    // bottom: 0;
-    // z-index: 9;
+    background: var(--site-bg);
     font-weight: 600;
+    padding: 10px;
+    &:hover {
+      background: var(--site-bg);
+    }
   }
 
   &__review {
@@ -2996,7 +3468,7 @@ button,
     width: 100%;
     margin-bottom: 6px;
     font-size: 12px;
-    opacity: 0.4;
+    opacity: 0.6;
     padding-left: 13px;
     @include unselectable;
 
@@ -3279,6 +3751,40 @@ button,
     width: 20px;
     height: 20px;
     fill: #fff;
+  }
+}
+
+.more-info {
+  text-align: center;
+  margin-bottom: 12px;
+  position: relative;
+  font-size: 11px;
+  padding: 10px 0;
+  background: transparent;
+  opacity: 0.4;
+
+  &:hover {
+    background: transparent;
+    opacity: 1;
+  }
+}
+
+.social {
+  display: flex;
+  @include button-effect;
+
+  &__link {
+    margin-top: 20px;
+    flex: auto;
+    padding: 10px 8px 10px 8px;
+    background: rgba(0, 0, 0, 0.411);
+    @include button-effect;
+  }
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: #fff;
+    margin: 0;
   }
 }
 
