@@ -392,7 +392,7 @@
                       />
                     </span>
                   </div>
-                  <div @click.stop="sortByListenings">
+                  <!-- <div @click.stop="sortByListenings">
                     <span> По прослушиваниям</span>
                     <span class="topline__sort-arrow">
                       <addSVG
@@ -404,7 +404,7 @@
                         icon="sort-down"
                       />
                     </span>
-                  </div>
+                  </div> -->
                   <div @click.stop="sortByDuration">
                     <span> По длительности</span>
                     <span class="topline__sort-arrow">
@@ -544,7 +544,7 @@
                 <span class="subline__item episode__duration">
                   {{ formatDuration(item.duration) }}
                 </span>
-                <span class="subline__item episode__listenings">
+                <!-- <span class="subline__item episode__listenings">
                   <addSVG icon="headphones" />
                   <span class="nowrap">
                     <template v-if="+item.listenings > 200">
@@ -552,7 +552,7 @@
                     </template>
                     <template v-else> Новый выпуск! </template>
                   </span>
-                </span>
+                </span> -->
 
                 <span
                   @click="toggleDescription(item.id)"
@@ -990,6 +990,7 @@ export default {
   created() {},
   mounted() {
     this.setPropFromLocalStorage("episodes");
+    // fetch("http://localhost:80/api/episodes")
     fetch("https://podcast.newochem.io/api/episodes")
       .then((response) => {
         return response.json();
@@ -1017,6 +1018,7 @@ export default {
 
     this.setPropFromLocalStorage("userPlalists");
     this.setPropFromLocalStorage("zPlayer");
+    this.zPlayer.isPlaying = false;
     if (this.episodes.length) {
       this.addPlayerJS();
       this.paging();
@@ -1144,6 +1146,7 @@ export default {
     zPlayerInit() {
       if (!this.zPlayer.title) {
         this.zPlayer.title = this.episodes[0].title;
+        this.zPlayer.id = this.episodes[0].id;
       }
       this.playerNode.addEventListener("new", () => {
         this.zPlayer.id = this.player.api("playlist_id");
@@ -2416,6 +2419,11 @@ button,
     > div,
     > button {
       margin-bottom: 6px;
+      width: 100%;
+
+      .icon {
+        width: 16px;
+      }
     }
   }
 
@@ -2467,12 +2475,12 @@ button,
     }
   }
 
-  &__duration {
-    margin-right: 16px;
-    @media (max-width: 768px) {
-      margin-right: 12px;
-    }
-  }
+  // &__duration {
+  //   margin-right: 16px;
+  //   @media (max-width: 768px) {
+  //     margin-right: 12px;
+  //   }
+  // }
 
   &__add-to-playlist {
     cursor: pointer;
@@ -2653,7 +2661,7 @@ button,
     fill: #fff !important;
   }
   &__links {
-    // margin-left: 30px;
+    margin-left: 40px;
     margin-top: 4px;
     z-index: 90;
     display: flex;
