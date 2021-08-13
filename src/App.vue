@@ -888,12 +888,16 @@
                             @mousemove="progressMouseOver"
                             @mouseleave="hideProgressMouseOver"
                         ></div>
-                        <div class="zPlayer__time">
-                            {{ zPlayer.time > 0 ? toHHMMSS(zPlayer.time) : '' }}
-                        </div>
-                        <div class="zPlayer__duration">
+                        <div class="zPlayer__time unselectable">
                             {{
-                                zPlayer.duration > 0
+                                !zPlayer.time && zPlayer.time > 0
+                                    ? toHHMMSS(zPlayer.time)
+                                    : ''
+                            }}
+                        </div>
+                        <div class="zPlayer__duration unselectable">
+                            {{
+                                !zPlayer.duration && zPlayer.duration > 0
                                     ? toHHMMSS(zPlayer.duration)
                                     : ''
                             }}
