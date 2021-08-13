@@ -87,7 +87,7 @@
                             </span>
                         </span>
                     </div>
-                    <template v-if="podcast.projectLinks">
+                    <!-- <template v-if="podcast.projectLinks">
                         <div
                             class="info-block__social social"
                             v-show="!isMinimizedInfo"
@@ -106,13 +106,13 @@
                                 </a>
                             </template>
                         </div>
-                    </template>
+                    </template> -->
                 </div>
 
                 <div class="listen" v-show="!isMinimizedInfo">
                     <div class="listen__review">
                         <addSVG icon="arrow-right-up" /><span>
-                            Оставьте нам отзыв</span
+                            Слушайте где удобно</span
                         >
                     </div>
 
@@ -121,7 +121,7 @@
                         :key="link.name"
                     >
                         <a
-                            v-if="index + 1 <= linksToShow"
+                            v-if="index + 1 <= listenLinksToShow"
                             class="listen__link"
                             :href="link.link"
                             target="_blank"
@@ -132,16 +132,53 @@
                         </a>
                     </template>
                     <div
-                        v-if="linksToShow < 100"
+                        v-if="listenLinksToShow < 100"
                         class="button listen__more"
-                        @click="linksToShow += 100"
+                        @click="listenLinksToShow += 100"
                     >
                         Показать все
                     </div>
                     <div
-                        v-if="linksToShow > 100"
+                        v-if="listenLinksToShow > 100"
                         class="button listen__more"
-                        @click="linksToShow -= 100"
+                        @click="listenLinksToShow -= 100"
+                    >
+                        Скрыть
+                    </div>
+                </div>
+                <div class="listen" v-show="!isMinimizedInfo">
+                    <div class="listen__review">
+                        <addSVG icon="arrow-right-up" /><span>
+                            Подписывайтесь на нас</span
+                        >
+                    </div>
+
+                    <template
+                        v-for="(link, index) in podcast.projectLinks"
+                        :key="link.name"
+                    >
+                        <a
+                            v-if="index + 1 <= socialLinksToShow"
+                            class="listen__link"
+                            :href="link.link"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <addSVG :icon="link.icon" />
+                            <span class="nowrap">{{ link.name }}</span>
+                        </a>
+                    </template>
+                    <div
+                        v-if="socialLinksToShow < 100"
+                        class="button listen__more"
+                        @click="socialLinksToShow += 100"
+                    >
+                        Показать все
+                    </div>
+                    <div
+                        v-if="socialLinksToShow > 100"
+                        class="button listen__more"
+                        @click="socialLinksToShow -= 100"
                     >
                         Скрыть
                     </div>
@@ -1142,7 +1179,8 @@ export default {
             playlistVisible: false,
             playlistHeight: this.$refs.playlistBlock,
             isMinimizedInfo: false,
-            linksToShow: 4,
+            listenLinksToShow: 5,
+            socialLinksToShow: 5,
             windowWidth: window.innerHeight,
             scrollY: 0,
             isMobile: false,
@@ -2214,7 +2252,7 @@ button,
 }
 
 .info-block {
-    padding: 20px 30px 60px 30px;
+    padding: 20px 30px 30px 30px;
     height: fit-content;
     background: var(--block-bg);
     margin-bottom: 10px;
@@ -3618,7 +3656,7 @@ button,
     display: flex;
     flex-wrap: wrap;
     margin-bottom: 10px;
-    margin-top: 18px;
+    margin-top: 22px;
     position: relative;
     &__link {
         // width: 50%;
@@ -3669,9 +3707,9 @@ button,
     &__review {
         display: flex;
         width: 100%;
-        margin-bottom: 6px;
-        font-size: 12px;
-        opacity: 0.6;
+        margin-bottom: 8px;
+        font-size: 13px;
+        opacity: 0.8;
         padding-left: 13px;
         @include unselectable;
 
@@ -3689,7 +3727,8 @@ button,
         }
         span:last-child {
             flex: auto;
-            font-family: cursive;
+            // font-family: cursive;
+            font-weight: 600;
         }
     }
 }

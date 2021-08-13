@@ -5,7 +5,7 @@
 	"email": "go@newochem.io",
 	"startDate": "20 сентября 2017",
 	"projectLinks": [
-		{"name": "Site", "icon": "share-site", "link": "https://newochem.io"},
+		
 		{"name": "Telegram", "icon": "share-tg", "link": "https://t.me/newochem"},
 
 		{"name": "VK", "icon": "share-vk", "link": "https://vk.com/newochem"},
@@ -20,10 +20,16 @@
 			"link": "https://twitter.com/TheNewochem"
 		},
 		{
-			"name": "Newsletter",
+			"name": "Воскресная email-рассылка",
 			"icon": "newsletter",
 			"link": "https://newochem.io/newsletter"
-		}
+		},
+		{
+			"name": "Канал VK",
+			"icon": "share-vk",
+			"link": "https://vk.com/newochem"
+		},
+		{"name": "Сайт", "icon": "share-site", "link": "https://newochem.io"}
 	],
 	"listenLinks": [
 		{
