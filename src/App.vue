@@ -330,7 +330,10 @@
                                                     playing:
                                                         zPlayer.id == track.id,
                                                 }"
-                                                class="playlist__track playlist-track"
+                                                class="
+                                                    playlist__track
+                                                    playlist-track
+                                                "
                                             >
                                                 <div
                                                     class="playlist-track__play"
@@ -359,7 +362,9 @@
                                                 </div>
 
                                                 <div
-                                                    class="playlist-track__title"
+                                                    class="
+                                                        playlist-track__title
+                                                    "
                                                     @click="
                                                         playEpisode(track.id)
                                                     "
@@ -368,19 +373,26 @@
                                                 </div>
 
                                                 <div
-                                                    class="playlist-track__handle handle"
+                                                    class="
+                                                        playlist-track__handle
+                                                        handle
+                                                    "
                                                 >
                                                     <addSVG icon="drag" />
                                                 </div>
                                                 <div
-                                                    class="playlist-track__duration"
+                                                    class="
+                                                        playlist-track__duration
+                                                    "
                                                 >
                                                     {{
                                                         toHHMMSS(track.duration)
                                                     }}
                                                 </div>
                                                 <div
-                                                    class="playlist-track__remove"
+                                                    class="
+                                                        playlist-track__remove
+                                                    "
                                                     @click="
                                                         toggleTrackInPlaylist(
                                                             track
@@ -672,7 +684,10 @@
                                 <span
                                     v-if="playlistActive"
                                     @click="toggleTrackInPlaylist(item)"
-                                    class="subline__item episode__add-to-playlist"
+                                    class="
+                                        subline__item
+                                        episode__add-to-playlist
+                                    "
                                 >
                                     <!-- <addSVG icon="playlist-add" />  -->
                                     <span class="nowrap">
@@ -712,9 +727,10 @@
                                     @click="toggleDescription(item.id)"
                                     class="subline__item episode__about"
                                     :class="{
-                                        episode__about_active: openedDescriptions.includes(
-                                            item.id
-                                        ),
+                                        episode__about_active:
+                                            openedDescriptions.includes(
+                                                item.id
+                                            ),
                                     }"
                                 >
                                     <addSVG icon="hashtag" />
@@ -724,9 +740,8 @@
                                     class="subline__item episode__share share"
                                     @click="toggleShare(item.id)"
                                     :class="{
-                                        episode__about_active: openedShare.includes(
-                                            item.id
-                                        ),
+                                        episode__about_active:
+                                            openedShare.includes(item.id),
                                     }"
                                 >
                                     <addSVG icon="share" />
@@ -1111,32 +1126,27 @@ export default {
             plylsts: [
                 {
                     name: 'Тим Урбан. История под названием МЫ',
-                    img:
-                        'https://newochem.io/wp-content/uploads/2020/01/28-2-1024x995.png',
+                    img: 'https://newochem.io/wp-content/uploads/2020/01/28-2-1024x995.png',
                     episodes: [273, 283, 284, 294, 307, 311, 331, 361],
                 },
                 {
                     name: 'Интересное про COVID',
-                    img:
-                        'https://news.liga.net/images/general/2021/07/19/thumbnail-tw-20210719075417-1207.jpg?v=1626672933',
+                    img: 'https://news.liga.net/images/general/2021/07/19/thumbnail-tw-20210719075417-1207.jpg?v=1626672933',
                     episodes: [313, 298, 296, 295, 276],
                 },
                 {
                     name: 'Искусственный интеллект',
-                    img:
-                        'https://www.jewish-museum.ru/upload/resize_cache/iblock/746/707_470_2/7466b0935ef0922abf8ef756c5b8a474.jpg',
+                    img: 'https://www.jewish-museum.ru/upload/resize_cache/iblock/746/707_470_2/7466b0935ef0922abf8ef756c5b8a474.jpg',
                     episodes: [353, 285, 262, 229, 214, 95, 26, 8],
                 },
                 {
                     name: 'О психиатрии и ментальных расстройствах',
-                    img:
-                        'https://i.obozrevatel.com/attachment/2020/2/10/8dc72c.jpg',
+                    img: 'https://i.obozrevatel.com/attachment/2020/2/10/8dc72c.jpg',
                     episodes: [350, 327, 309, 289, 240, 235, 206, 40],
                 },
                 {
                     name: 'Для миллениалов',
-                    img:
-                        'https://ic.pics.livejournal.com/valerongrach/21518748/104989/104989_900.jpg',
+                    img: 'https://ic.pics.livejournal.com/valerongrach/21518748/104989/104989_900.jpg',
                     episodes: [272, 268, 203, 194, 160, 77, 37],
                 },
             ],
@@ -1206,6 +1216,7 @@ export default {
                     this.addPlayerJS()
                     this.paging()
                 }
+                this.sortByDate()
             })
             .catch((err) => {
                 console.log(err)
@@ -1268,7 +1279,10 @@ export default {
                 this.countPlaylistDuration()
                 if (this.playlist.length) {
                     let IDsInPlaylist = this.playlist.map((track) => {
-                        return track.id
+                        console.log(track)
+                        if (track && track.id) {
+                            return track.id
+                        }
                     })
                     const urlParams = new URLSearchParams(
                         window.location.search
@@ -1284,7 +1298,6 @@ export default {
         playlistName: {
             handler: function (newVal) {
                 const urlParams = new URLSearchParams(window.location.search)
-
                 urlParams.set('playlistName', newVal)
                 const url = new URL(location)
                 url.search = urlParams
@@ -1320,8 +1333,6 @@ export default {
             this.URLData = Object.fromEntries(
                 new URL(window.location).searchParams.entries()
             )
-            console.log(this.URLData)
-            console.log(this.URLData.hasOwnProperty('playlist'))
         },
         countPlaylistDuration() {
             this.playlistDuration = 0
@@ -1631,9 +1642,15 @@ export default {
 
             episodes.sort((a, b) => {
                 if (!this.sortDateDESC) {
-                    return b.id - a.id
+                    return (
+                        new Date(a.pubDate).getTime() -
+                        new Date(b.pubDate).getTime()
+                    )
                 } else {
-                    return a.id - b.id
+                    return (
+                        new Date(b.pubDate).getTime() -
+                        new Date(a.pubDate).getTime()
+                    )
                 }
             })
             this.paging()
@@ -1704,7 +1721,8 @@ export default {
             return `${day} ${months[numerOfMonth]} ${year}`
         },
         formatDescriprion(text) {
-            var re = /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\/%?=~_()|!:,.;]*[-a-z0-9+&@#\/%=~_()|])/gi
+            var re =
+                /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\/%?=~_()|!:,.;]*[-a-z0-9+&@#\/%=~_()|])/gi
             return text.replace(re, function (match, lParens, url) {
                 var rParens = ''
                 lParens = lParens || ''
@@ -1919,6 +1937,9 @@ export default {
             this.showEpisodes = true
         },
         playPlylst(arrIds = [], playlistTitle, play = true) {
+            if (arrIds[0] === '') {
+                arrIds = []
+            }
             this.savePlaylistLineActive = false
             this.playlistName = playlistTitle
 
