@@ -146,7 +146,11 @@
                         Скрыть
                     </div>
                 </div>
-                <div class="listen" v-show="!isMinimizedInfo">
+                <div
+                    class="listen"
+                    v-show="!isMinimizedInfo"
+                    style="margin-top: 0"
+                >
                     <div class="listen__review">
                         <addSVG icon="arrow-right-up" /><span>
                             Подписывайтесь на нас</span
@@ -227,7 +231,7 @@
                     @click="isMinimizedInfo = !isMinimizedInfo"
                     :style="
                         isMinimizedInfo
-                            ? 'margin-left: auto;top: -85px; margin-bottom: 0;'
+                            ? 'margin-left: auto;top: -85px; margin-bottom: 0;height:0'
                             : ''
                     "
                 >
@@ -295,12 +299,12 @@
                                         iconClass="playlist__save-btn"
                                     />
                                 </span>
-                                <span v-if="!savePlaylistLineActive">
+                                <!-- <span v-if="!savePlaylistLineActive">
                                     <addSVG
                                         icon="share"
                                         iconClass="playlist__shuffle"
                                     />
-                                </span>
+                                </span> -->
                                 <span
                                     v-if="isMobile && !savePlaylistLineActive"
                                 >
@@ -486,6 +490,7 @@
                             v-if="isSearchActive"
                             @keyup="search()"
                             @change="search()"
+                            @click="search()"
                             class="topline__search-input"
                             v-model="searchText"
                             ref="search"
@@ -499,7 +504,7 @@
 
                                 <div class="topline__sort-block">
                                     <div @click.stop="sortByDate">
-                                        <span> По дате</span>
+                                        <span> По дате выхода</span>
                                         <span class="topline__sort-arrow">
                                             <addSVG
                                                 :showIconIf="
@@ -1115,7 +1120,6 @@ export default {
         return {
             podcast: podcastJSON,
             episodes: [],
-            // episodes: episodesJSON.episodes,
             siteURL: window.location.origin,
             URLData: null,
             sharedTrack: null,
@@ -1546,6 +1550,9 @@ export default {
 
                 if (this.isMobile) {
                     this.openMobileEpisodes()
+                } else {
+                    this.showPlaylists = false
+                    this.showEpisodes = true
                 }
 
                 if (!this.URLData.ep && id) {
@@ -1947,12 +1954,16 @@ export default {
             this.playlistVisible = true
             this.isMinimizedInfo = true
             this.openPlaylist()
-            arrIds.forEach((id) => {
-                this.addTrackInPlaylist(this.episodes.find((x) => x.id == id))
-            })
-            if (play) {
-                this.player.api('play', 'id:' + this.playlist[0].id)
-            }
+            setTimeout(() => {
+                arrIds.forEach((id) => {
+                    this.addTrackInPlaylist(
+                        this.episodes.find((x) => x.id == id)
+                    )
+                })
+                if (play) {
+                    this.player.api('play', 'id:' + this.playlist[0].id)
+                }
+            }, 10)
         },
         createCustomPlaylist() {
             this.playlistName = 'Новый плейлист'
@@ -2241,6 +2252,13 @@ button,
         fill: #fff;
         margin-right: 2px;
     }
+}
+
+input::-webkit-search-decoration,
+input::-webkit-search-cancel-button,
+input::-webkit-search-results-button,
+input::-webkit-search-results-decoration {
+    display: none;
 }
 
 .container {
@@ -3389,6 +3407,7 @@ button,
     &__empty-pllst {
         padding: 8px 6px 12px;
         opacity: 0.6;
+        text-align: center;
         @include unselectable;
     }
 
@@ -3749,7 +3768,7 @@ button,
         span:last-child {
             flex: auto;
             // font-family: cursive;
-            font-weight: 600;
+            // font-weight: 600;
         }
     }
 }
