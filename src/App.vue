@@ -334,7 +334,10 @@
                                                     playing:
                                                         zPlayer.id == track.id,
                                                 }"
-                                                class="playlist__track playlist-track"
+                                                class="
+                                                    playlist__track
+                                                    playlist-track
+                                                "
                                             >
                                                 <div
                                                     class="playlist-track__play"
@@ -363,7 +366,9 @@
                                                 </div>
 
                                                 <div
-                                                    class="playlist-track__title"
+                                                    class="
+                                                        playlist-track__title
+                                                    "
                                                     @click="
                                                         playEpisode(track.id)
                                                     "
@@ -372,19 +377,26 @@
                                                 </div>
 
                                                 <div
-                                                    class="playlist-track__handle handle"
+                                                    class="
+                                                        playlist-track__handle
+                                                        handle
+                                                    "
                                                 >
                                                     <addSVG icon="drag" />
                                                 </div>
                                                 <div
-                                                    class="playlist-track__duration"
+                                                    class="
+                                                        playlist-track__duration
+                                                    "
                                                 >
                                                     {{
                                                         toHHMMSS(track.duration)
                                                     }}
                                                 </div>
                                                 <div
-                                                    class="playlist-track__remove"
+                                                    class="
+                                                        playlist-track__remove
+                                                    "
                                                     @click="
                                                         toggleTrackInPlaylist(
                                                             track
@@ -677,7 +689,10 @@
                                 <span
                                     v-if="playlistActive"
                                     @click="toggleTrackInPlaylist(item)"
-                                    class="subline__item episode__add-to-playlist"
+                                    class="
+                                        subline__item
+                                        episode__add-to-playlist
+                                    "
                                 >
                                     <!-- <addSVG icon="playlist-add" />  -->
                                     <span class="nowrap">
@@ -717,9 +732,10 @@
                                     @click="toggleDescription(item.id)"
                                     class="subline__item episode__about"
                                     :class="{
-                                        episode__about_active: openedDescriptions.includes(
-                                            item.id
-                                        ),
+                                        episode__about_active:
+                                            openedDescriptions.includes(
+                                                item.id
+                                            ),
                                     }"
                                 >
                                     <addSVG icon="hashtag" />
@@ -729,9 +745,8 @@
                                     class="subline__item episode__share share"
                                     @click="toggleShare(item.id)"
                                     :class="{
-                                        episode__about_active: openedShare.includes(
-                                            item.id
-                                        ),
+                                        episode__about_active:
+                                            openedShare.includes(item.id),
                                     }"
                                 >
                                     <addSVG icon="share" />
@@ -932,14 +947,14 @@
                         ></div>
                         <div class="zPlayer__time unselectable">
                             {{
-                                zPlayer.time && zPlayer.time > 0
+                                !zPlayer.time && zPlayer.time > 0
                                     ? toHHMMSS(zPlayer.time)
                                     : ''
                             }}
                         </div>
                         <div class="zPlayer__duration unselectable">
                             {{
-                                zPlayer.duration && zPlayer.duration > 0
+                                !zPlayer.duration && zPlayer.duration > 0
                                     ? toHHMMSS(zPlayer.duration)
                                     : ''
                             }}
@@ -1115,32 +1130,27 @@ export default {
             plylsts: [
                 {
                     name: 'Тим Урбан. История под названием МЫ',
-                    img:
-                        'https://newochem.io/wp-content/uploads/2020/01/28-2-1024x995.png',
+                    img: 'https://newochem.io/wp-content/uploads/2020/01/28-2-1024x995.png',
                     episodes: [273, 283, 284, 294, 307, 311, 331, 361],
                 },
                 {
                     name: 'Интересное про COVID',
-                    img:
-                        'https://news.liga.net/images/general/2021/07/19/thumbnail-tw-20210719075417-1207.jpg?v=1626672933',
+                    img: 'https://news.liga.net/images/general/2021/07/19/thumbnail-tw-20210719075417-1207.jpg?v=1626672933',
                     episodes: [313, 298, 296, 295, 276],
                 },
                 {
                     name: 'Искусственный интеллект',
-                    img:
-                        'https://www.jewish-museum.ru/upload/resize_cache/iblock/746/707_470_2/7466b0935ef0922abf8ef756c5b8a474.jpg',
+                    img: 'https://www.jewish-museum.ru/upload/resize_cache/iblock/746/707_470_2/7466b0935ef0922abf8ef756c5b8a474.jpg',
                     episodes: [353, 285, 262, 229, 214, 95, 26, 8],
                 },
                 {
                     name: 'О психиатрии и ментальных расстройствах',
-                    img:
-                        'https://i.obozrevatel.com/attachment/2020/2/10/8dc72c.jpg',
+                    img: 'https://i.obozrevatel.com/attachment/2020/2/10/8dc72c.jpg',
                     episodes: [350, 327, 309, 289, 240, 235, 206, 40],
                 },
                 {
                     name: 'Для миллениалов',
-                    img:
-                        'https://ic.pics.livejournal.com/valerongrach/21518748/104989/104989_900.jpg',
+                    img: 'https://ic.pics.livejournal.com/valerongrach/21518748/104989/104989_900.jpg',
                     episodes: [272, 268, 203, 194, 160, 77, 37],
                 },
             ],
@@ -1228,8 +1238,6 @@ export default {
             this.addPlayerJS()
             this.paging()
         }
-
-        this.addStopOnSpaceListener()
 
         window.onresize = () => {
             this.checkIsMobile()
@@ -1720,7 +1728,8 @@ export default {
             return `${day} ${months[numerOfMonth]} ${year}`
         },
         formatDescriprion(text) {
-            var re = /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\/%?=~_()|!:,.;]*[-a-z0-9+&@#\/%=~_()|])/gi
+            var re =
+                /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\/%?=~_()|!:,.;]*[-a-z0-9+&@#\/%=~_()|])/gi
             return text.replace(re, function (match, lParens, url) {
                 var rParens = ''
                 lParens = lParens || ''
@@ -2101,10 +2110,7 @@ export default {
         },
         addStopOnSpaceListener() {
             document.addEventListener('keydown', (event) => {
-                if (
-                    event.code === 'Space' &&
-                    document.activeElement.tagName.toLowerCase() != 'input'
-                ) {
+                if (event.code === 'Space') {
                     event.preventDefault()
                     this.zPlayerToggle()
                 }
