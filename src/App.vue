@@ -45,6 +45,38 @@
             </div>
         </div>
     </div>
+    <div class="donate-modal" v-if="showPatronModal">
+        <div class="donate-modal__overlay" @click="togglePatronModal"></div>
+
+        <div class="donate-modal__window">
+            <div class="donate-modal__header">
+                Войти как патрон
+                <div @click="togglePatronModal" class="donate-modal__close">
+                    <addSVG icon="close" />
+                </div>
+                <div class="patron-login">
+                    <input
+                        :disabled="patronLoading"
+                        type="email"
+                        name="patron-email"
+                        id=""
+                        v-model="patronEmail"
+                        placeholder="Введите ваш email"
+                    />
+                    <input
+                        :disabled="patronLoading"
+                        type="submit"
+                        value="Войти"
+                        class="button"
+                        @click="loginAsPatron"
+                    />
+                    <div class="patron-message">
+                        {{ patronMessage ?? patronMessage }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="container">
         <div class="page">
@@ -71,6 +103,7 @@
                         </span>
                         <span class="donate-btns">
                             <a
+                                v-if="!isPatron"
                                 class="button patreon"
                                 href="https://www.patreon.com/join/newochem?"
                                 target="_blank"
@@ -79,14 +112,25 @@
                                 Стать патроном
                             </a>
                             <span
+                                v-if="!isPatron"
                                 @click="toggleDonateModal"
                                 class="button"
                                 style="padding: 10px 12px"
                             >
                                 Задонатить
                             </span>
+                            <a
+                                v-if="isPatron"
+                                class="button patreon"
+                                href="https://www.patreon.com/join/newochem?"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Вы наш патрон
+                            </a>
                         </span>
                     </div>
+
                     <!-- <template v-if="podcast.projectLinks">
                         <div
                             class="info-block__social social"
@@ -108,6 +152,14 @@
                         </div>
                     </template> -->
                 </div>
+                <span
+                    v-if="!isPatron"
+                    @click="togglePatronModal"
+                    class="button"
+                    style="padding: 10px 12px"
+                >
+                    Я патрон Newочём
+                </span>
 
                 <div class="listen" v-show="!isMinimizedInfo">
                     <div class="listen__review">
@@ -252,7 +304,11 @@
                                 type="text"
                                 placeholder="Название плейлиста"
                                 class="playlist__heading"
-                                v-on:keyup.enter="savePlaylist"
+                                v-on:keyup.enter="
+                                    savePlaylistLineActive
+                                        ? savePlaylist()
+                                        : $event.target.blur()
+                                "
                             />
 
                             <span
@@ -267,6 +323,7 @@
                                 v-if="playlist.length > 0"
                             >
                                 <span
+                                    title="Перемешать"
                                     v-if="
                                         !savePlaylistLineActive &&
                                         playlist.length > 1
@@ -278,14 +335,17 @@
                                         iconClass="playlist__shuffle"
                                     />
                                 </span>
-                                <span v-if="!savePlaylistLineActive">
+                                <span
+                                    v-if="!savePlaylistLineActive"
+                                    title="Очистить плейлист"
+                                >
                                     <addSVG
                                         icon="delete"
                                         :clickIcon="emptyPlaylist"
                                         iconClass="playlist__shuffle"
                                     />
                                 </span>
-                                <span>
+                                <span title="Сохранить плейлист">
                                     <addSVG
                                         icon="save"
                                         :clickIcon="toggleSavePlaylistLine"
@@ -366,6 +426,9 @@
                                                 </div>
 
                                                 <div
+                                                    :title="
+                                                        getTitleByID(track.id)
+                                                    "
                                                     class="
                                                         playlist-track__title
                                                     "
@@ -377,6 +440,7 @@
                                                 </div>
 
                                                 <div
+                                                    title="Переместить"
                                                     class="
                                                         playlist-track__handle
                                                         handle
@@ -394,6 +458,7 @@
                                                     }}
                                                 </div>
                                                 <div
+                                                    title="Убрать из плейлиста"
                                                     class="
                                                         playlist-track__remove
                                                     "
@@ -503,7 +568,7 @@
                                 <addSVG icon="sort-down" />
 
                                 <div class="topline__sort-block">
-                                    <div @click.stop="sortByDate">
+                                    <div @click.stop="toggleSortByDate">
                                         <span> По дате выхода</span>
                                         <span class="topline__sort-arrow">
                                             <addSVG
@@ -665,7 +730,10 @@
                     >
                         <div
                             class="episode__play-btn"
-                            :class="{ playing: zPlayer.id == item.id }"
+                            :class="{
+                                playing: zPlayer.id == item.id,
+                                disabled: item.patreon && !isPatron,
+                            }"
                             @click="playEpisode(item.id)"
                         >
                             <addSVG
@@ -687,7 +755,10 @@
                             </h2>
                             <div class="episode__subline subline">
                                 <span
-                                    v-if="playlistActive"
+                                    v-if="
+                                        playlistActive &&
+                                        (!item.patreon || isPatron)
+                                    "
                                     @click="toggleTrackInPlaylist(item)"
                                     class="
                                         subline__item
@@ -715,7 +786,10 @@
                                     </span>
                                 </span>
 
-                                <span class="subline__item episode__duration">
+                                <span
+                                    class="subline__item episode__duration"
+                                    :title="toHHMMSS(item.duration)"
+                                >
                                     {{ formatDuration(item.duration) }}
                                 </span>
                                 <!-- <span class="subline__item episode__listenings">
@@ -729,19 +803,42 @@
                 </span> -->
 
                                 <span
+                                    v-if="item.patreon"
+                                    class="subline__item patreon-episode"
+                                >
+                                    Для патронов
+                                </span>
+                                <span
+                                    v-if="!item.patreon"
                                     @click="toggleDescription(item.id)"
                                     class="subline__item episode__about"
                                     :class="{
                                         episode__about_active:
                                             openedDescriptions.includes(
                                                 item.id
-                                            ),
+                                            ) && !item.patreon,
                                     }"
                                 >
                                     <addSVG icon="hashtag" />
                                     <span class="nowrap"> Описание </span>
                                 </span>
                                 <span
+                                    @click="togglePatronModal"
+                                    v-if="item.patreon && !isPatron"
+                                    class="subline__item episode__about"
+                                >
+                                    <span class="nowrap"> Войти </span>
+                                </span>
+                                <a
+                                    href="https://www.patreon.com/join/newochem?"
+                                    target="_blank"
+                                    v-if="item.patreon && !isPatron"
+                                    class="subline__item episode__about"
+                                >
+                                    <span class="nowrap"> Стать патроном </span>
+                                </a>
+                                <span
+                                    v-if="!item.patreon"
                                     class="subline__item episode__share share"
                                     @click="toggleShare(item.id)"
                                     :class="{
@@ -750,17 +847,15 @@
                                     }"
                                 >
                                     <addSVG icon="share" />
-                                    <span class="nowrap">
-                                        <template v-if="!isMobile">
-                                            Поделиться
-                                        </template>
-                                    </span>
+                                    <span class="nowrap"> Поделиться </span>
                                 </span>
                             </div>
                         </div>
                         <div
                             class="share__links"
-                            v-if="openedShare.includes(item.id)"
+                            v-if="
+                                openedShare.includes(item.id) && !item.patreon
+                            "
                         >
                             <a
                                 class="subline__item interactive"
@@ -865,7 +960,7 @@
                         </div>
 
                         <!-- </transition> -->
-                        <div class="episode__menu">
+                        <div v-if="!item.patreon" class="episode__menu">
                             <addSVG icon="three-dots" />
                             <div class="episode__submenu">
                                 <button
@@ -947,14 +1042,14 @@
                         ></div>
                         <div class="zPlayer__time unselectable">
                             {{
-                                !zPlayer.time && zPlayer.time > 0
+                                zPlayer.time && zPlayer.time > 0
                                     ? toHHMMSS(zPlayer.time)
                                     : ''
                             }}
                         </div>
                         <div class="zPlayer__duration unselectable">
                             {{
-                                !zPlayer.duration && zPlayer.duration > 0
+                                zPlayer.duration && zPlayer.duration > 0
                                     ? toHHMMSS(zPlayer.duration)
                                     : ''
                             }}
@@ -1200,6 +1295,11 @@ export default {
             isMobile: false,
             playlistName: '',
             savePlaylistLineActive: false,
+            showPatronModal: false,
+            patronEmail: null,
+            isPatron: false,
+            patronMessage: null,
+            patronLoading: false,
         }
     },
     created() {},
@@ -1213,19 +1313,20 @@ export default {
             .then((data) => {
                 if (
                     data.episodes &&
-                    this.episodes.lenght != data.episodes.length &&
+                    this.episodes.length != data.episodes.length &&
                     data.episodes.length > 0
                 ) {
                     this.episodes = data.episodes
                     this.addPlayerJS()
                     this.paging()
                 }
-                this.sortByDate()
+                // this.toggleSortByDate()
             })
             .catch((err) => {
                 console.log(err)
                 this.addPlayerJS()
             })
+
         this.checkIsMobile()
 
         this.setURLData()
@@ -1248,6 +1349,7 @@ export default {
         window.addEventListener('popstate', function (e) {
             window.location.href = location.href
         })
+        this.getPatronsEpisodes()
     },
     watch: {
         player: {
@@ -1283,7 +1385,6 @@ export default {
                 this.countPlaylistDuration()
                 if (this.playlist.length) {
                     let IDsInPlaylist = this.playlist.map((track) => {
-                        console.log(track)
                         if (track && track.id) {
                             return track.id
                         }
@@ -1333,6 +1434,70 @@ export default {
         },
     },
     methods: {
+        async getPatronsEpisodes() {
+            for (let i = 0; i < this.episodes.length; i++) {
+                if (this.episodes[i].patreon) {
+                    this.episodes.splice(i, 1)
+                }
+            }
+            fetch(
+                `http://localhost:80/api/patreon-episodes?email=${this.patronEmail}`
+            )
+                .then((response) => {
+                    return response.json()
+                })
+                .then((data) => {
+                    this.episodes = this.episodes.concat(data.episodes)
+                    if (this.isPatron) {
+                        this.player.api('file', this.getPlaylist())
+                    }
+                    this.sortByDate()
+                })
+                .catch((err) => {
+                    console.log(err)
+                })
+        },
+        async loginAsPatron() {
+            this.patronLoading = true
+            this.patronMessage = null
+            if (this.patronEmail && this.validateEmail(this.patronEmail)) {
+                fetch(
+                    `http://localhost:80/api/isPatron?email=${this.patronEmail}`
+                )
+                    .then((response) => {
+                        return response.json()
+                    })
+                    .then((data) => {
+                        if (!data.isPatron) {
+                            this.patronMessage =
+                                'Нет такого мейла ни у кого из наших патронов :('
+                            this.patronLoading = false
+                        } else {
+                            this.patronMessage = 'Отлично!'
+                            this.isPatron = data.isPatron
+
+                            setTimeout(() => {
+                                this.showPatronModal = false
+                            }, 800)
+                            this.getPatronsEpisodes()
+                        }
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    })
+            } else {
+                this.isPatron = false
+                this.patronMessage = 'Неправильный email'
+                this.patronLoading = false
+
+                return false
+            }
+        },
+        validateEmail(email) {
+            const re =
+                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            return re.test(String(email).toLowerCase())
+        },
         setURLData() {
             this.URLData = Object.fromEntries(
                 new URL(window.location).searchParams.entries()
@@ -1639,6 +1804,26 @@ export default {
         sortByDate() {
             this.sortListeningsDESC = null
             this.sortDuration = null
+            this.sortDateDESC = true
+            let episodes
+            if (this.searchText !== '') {
+                episodes = this.searchResults
+            } else {
+                episodes = this.episodes
+            }
+
+            episodes.sort((a, b) => {
+                return (
+                    new Date(b.pubDate).getTime() -
+                    new Date(a.pubDate).getTime()
+                )
+            })
+            this.paging()
+            this.sortDateDESC = !this.sortDateDESC
+        },
+        toggleSortByDate() {
+            this.sortListeningsDESC = null
+            this.sortDuration = null
 
             let episodes
             if (this.searchText !== '') {
@@ -1926,7 +2111,6 @@ export default {
         },
         emptyPlaylist() {
             this.playlist = []
-            // this.makeArrayFalsy(this.episodeInPlaylist);
         },
         getTitleByID(episodeID) {
             return this.episodes.find((x) => x.id == episodeID).title
@@ -1987,6 +2171,9 @@ export default {
         toggleDonateModal() {
             this.showDonateModal = !this.showDonateModal
         },
+        togglePatronModal() {
+            this.showPatronModal = !this.showPatronModal
+        },
         toggleSavePlaylistLine() {
             this.savePlaylistLineActive = !this.savePlaylistLineActive
             if (this.savePlaylistLineActive) {
@@ -2016,19 +2203,13 @@ export default {
             this.$refs.playlistName.blur()
 
             if (this.isMobile) {
-                // this.playlistVisible = !this.playlistVisible;
                 this.openMobilePlaylists()
             }
-
-            // this.playlistName = null;
         },
         deleteUserPlaylist(index) {
             this.userPlaylists.splice(index, 1)
         },
-        // toggleSubmenu(e, id) {
-        //   this.openedSubmenu.push(id);
-        //   console.log(e);
-        // },
+
         openMobilePlaylists() {
             this.scrollToTop()
             this.showPlaylists = true
@@ -2800,6 +2981,8 @@ input::-webkit-search-results-decoration {
     &__about {
         cursor: pointer;
         padding: 4px 10px;
+        color: #fff;
+        text-decoration: none;
         @include button-effect;
 
         &_active {
@@ -3701,7 +3884,7 @@ input::-webkit-search-results-decoration {
     &__link {
         // width: 50%;
         background: var(--btn-color);
-        padding: 6px 22px 6px 12px;
+        padding: 6px 20px 6px 12px;
         border-radius: calc(var(--block-border-radius) / 2);
         margin-right: 12px;
         margin-bottom: 12px;
@@ -4170,5 +4353,39 @@ input::-webkit-search-results-decoration {
 
 .fade-enter, .fade-leave-to /* .fade-leave-active до версии 2.1.8 */ {
     height: 100%;
+}
+
+.patron-login {
+    display: flex;
+    margin: 30px 0;
+    align-items: center;
+    flex-wrap: wrap;
+    input {
+        color: var(--site-bg);
+        border: 1px solid var(--site-bg);
+        padding: 5px 20px;
+        border-radius: var(--block-border-radius);
+        font-size: 14px;
+        outline: none;
+        max-width: 300px;
+        width: 100%;
+    }
+    .button {
+        width: fit-content;
+        color: #fff;
+        margin: 0;
+    }
+    .patron-message {
+        width: 100%;
+        font-size: 16px;
+        margin: 10px 0;
+    }
+}
+
+.patreon-episode {
+    // position: absolute;
+    // top: -8px;
+    // left: 0;
+    margin-left: 10px;
 }
 </style>

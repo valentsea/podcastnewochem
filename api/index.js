@@ -1,13 +1,18 @@
 /* eslint-disable */
 
 const express = require('express')
+const fs = require('fs')
+const path = require('path')
 const cors = require('cors')
 const podcastFeedParser = require('podcast-feed-parser')
 const { MongoClient } = require('mongodb')
+const csvToJson = require('convert-csv-to-json')
 
 const mongoUrl =
     'mongodb+srv://tarasowalentin:Xy6EnM4ZGibsYKn@cluster0.7saxp.mongodb.net/newochem?retryWrites=true&w=majority'
 const RSS_URL = 'https://podster.fm/rss.xml?pid=48291'
+const PATREON_RSS_URL =
+    'https://www.patreon.com/rss/newochem?auth=XPyveZC4v9PFsa2KFDOXQ2BuWrJWBYO-'
 let intervalOfUpdating = 14400000 // 4 hours
 let epsodesCachedFromDB
 
@@ -27,7 +32,7 @@ async function updateEpisodesAPI() {
 updateEpisodesAPI()
 setInterval(() => {
     updateEpisodesAPI()
-}, 10000)
+}, intervalOfUpdating)
 
 // end of main logic
 
@@ -38,6 +43,17 @@ const port = 80
 
 app.get('/api/episodes', async (req, res) => {
     res.send(epsodesCachedFromDB)
+})
+app.get('/api/patreon-episodes', async (req, res) => {
+    let email = req.query.email
+    let isPatron = await checkIsPatron(email)
+    let episodes = await getEpisodesArrayFromPatreonRSS(isPatron)
+    res.send({ episodes })
+})
+app.get('/api/isPatron', async (req, res) => {
+    let email = req.query.email
+    let isPatron = await checkIsPatron(email)
+    res.send({ isPatron })
 })
 
 app.listen(port, () => {
@@ -75,6 +91,69 @@ async function getEpisodesArrayFromRSS() {
     }
 
     return episodes
+}
+
+async function getEpisodesArrayFromPatreonRSS(isPatron = false) {
+    const options = {
+        fields: {
+            episodes: ['title', 'description', 'pubDate', 'link', 'enclosure'],
+        },
+    }
+    const rss = await podcastFeedParser.getPodcastFromURL(
+        PATREON_RSS_URL,
+        options
+    )
+
+    let episodes = rss.episodes
+    shortEpisodes = []
+    episodes.forEach((episode, index) => {
+        if (episode.title.includes('Короткий Newочём')) {
+            episode.id = 'p' + index
+            episode.duration = Math.round(
+                ((episode.enclosure.length / 1024) * 8) / 192
+            )
+            episode.patreon = true
+            if (!isPatron) {
+                episode.enclosure.url = null
+            }
+            shortEpisodes.push(episode)
+        }
+    })
+
+    return shortEpisodes
+}
+// getEpisodesArrayFromPatreonRSS()
+async function getPatrons() {
+    let patreonJSON = new Promise((resolve, reject) => {
+        const dirpath = path.join(__dirname, '/patreon/')
+        return fs.readdir(dirpath, (err, files) => {
+            const csv = files.filter((el) => /\.csv$/.test(el))
+            csv.sort((a, b) => b.replace(/[D]+/g, '') - a.replace(/[D]+/g, ''))
+            let json = csvToJson
+                .fieldDelimiter(',')
+                .getJsonFromCsv(dirpath + csv[0])
+
+            resolve(json)
+        })
+    })
+
+    return await patreonJSON
+}
+// getPatrons().then(console.log)
+
+async function checkIsPatron(email) {
+    if (!email) {
+        return false
+    }
+    let patrons = await getPatrons()
+    for (let i = 0; i < patrons.length; i++) {
+        const patron = patrons[i]
+        console.log(patron)
+        if (patron['Email'].toLowerCase() == email.toLowerCase()) {
+            return true
+        }
+    }
+    return false
 }
 
 // TOOLS: DB
