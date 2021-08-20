@@ -1,16 +1,16 @@
 <template>
-    <div class="donate-modal" v-if="showDonateModal">
-        <div class="donate-modal__overlay" @click="toggleDonateModal"></div>
+    <div class="modal" v-if="showDonateModal">
+        <div class="modal__overlay" @click="toggleDonateModal"></div>
 
-        <div class="donate-modal__window">
-            <div class="donate-modal__header">
+        <div class="modal__window">
+            <div class="modal__header">
                 Задонатить
-                <div @click="toggleDonateModal" class="donate-modal__close">
+                <div @click="toggleDonateModal" class="modal__close">
                     <addSVG icon="close" />
                 </div>
             </div>
-            <div class="donate-modal__donate">
-                <div class="donate-modal__loader">
+            <div class="modal__donate">
+                <div class="modal__loader">
                     <div class="lds-ring">
                         <div></div>
                         <div></div>
@@ -29,7 +29,7 @@
                     scrolling="no"
                 ></iframe>
             </div>
-            <div class="donate-modal__other">
+            <div class="modal__other">
                 <span> <strong>Тинькофф:</strong> 5536 9138 1693 4463 </span>
                 <span> <strong>Сбербанк:</strong> 5469 5200 1501 6108 </span>
                 <span>
@@ -45,13 +45,13 @@
             </div>
         </div>
     </div>
-    <div class="donate-modal" v-if="showPatronModal">
-        <div class="donate-modal__overlay" @click="togglePatronModal"></div>
+    <div class="modal" v-if="showPatronModal">
+        <div class="modal__overlay" @click="togglePatronModal"></div>
 
-        <div class="donate-modal__window">
-            <div class="donate-modal__header">
+        <div class="modal__window">
+            <div class="modal__header">
                 Войти как патрон
-                <div @click="togglePatronModal" class="donate-modal__close">
+                <div @click="togglePatronModal" class="modal__close">
                     <addSVG icon="close" />
                 </div>
                 <div class="patron-login">
@@ -394,10 +394,7 @@
                                                     playing:
                                                         zPlayer.id == track.id,
                                                 }"
-                                                class="
-                                                    playlist__track
-                                                    playlist-track
-                                                "
+                                                class="playlist__track playlist-track"
                                             >
                                                 <div
                                                     class="playlist-track__play"
@@ -429,9 +426,7 @@
                                                     :title="
                                                         getTitleByID(track.id)
                                                     "
-                                                    class="
-                                                        playlist-track__title
-                                                    "
+                                                    class="playlist-track__title"
                                                     @click="
                                                         playEpisode(track.id)
                                                     "
@@ -441,17 +436,12 @@
 
                                                 <div
                                                     title="Переместить"
-                                                    class="
-                                                        playlist-track__handle
-                                                        handle
-                                                    "
+                                                    class="playlist-track__handle handle"
                                                 >
                                                     <addSVG icon="drag" />
                                                 </div>
                                                 <div
-                                                    class="
-                                                        playlist-track__duration
-                                                    "
+                                                    class="playlist-track__duration"
                                                 >
                                                     {{
                                                         toHHMMSS(track.duration)
@@ -459,9 +449,7 @@
                                                 </div>
                                                 <div
                                                     title="Убрать из плейлиста"
-                                                    class="
-                                                        playlist-track__remove
-                                                    "
+                                                    class="playlist-track__remove"
                                                     @click="
                                                         toggleTrackInPlaylist(
                                                             track
@@ -565,7 +553,7 @@
                         />
                         <div class="topline__icons">
                             <div class="topline__sort" @click="showSortBlock()">
-                                <addSVG icon="sort-down" />
+                                <addSVG icon="sort-filter" />
 
                                 <div class="topline__sort-block">
                                     <div @click.stop="toggleSortByDate">
@@ -612,6 +600,23 @@
                                                     sortDuration === false
                                                 "
                                                 icon="sort-down"
+                                            />
+                                        </span>
+                                    </div>
+                                    <div @click.stop="toggleShowPatronEpisodes">
+                                        <span> Выпуски для патронов</span>
+                                        <span class="topline__sort-arrow eye">
+                                            <addSVG
+                                                :showIconIf="
+                                                    showPatronEpisodes === true
+                                                "
+                                                icon="eye"
+                                            />
+                                            <addSVG
+                                                :showIconIf="
+                                                    showPatronEpisodes === false
+                                                "
+                                                icon="eye-disable"
                                             />
                                         </span>
                                     </div>
@@ -723,32 +728,47 @@
                 >
                     <div
                         class="tracks__episode episode"
-                        :class="{ playing: zPlayer.id == item.id }"
+                        :class="{
+                            playing: zPlayer.id == item.id,
+                            unvisible: !showPatronEpisodes && item.patreon,
+                        }"
                         :id="item.id"
                         v-for="item in podcastDisplayedEpisodes"
-                        :key="item.title"
+                        :key="item.id"
                     >
-                        <div
-                            class="episode__play-btn"
-                            :class="{
-                                playing: zPlayer.id == item.id,
-                                disabled: item.patreon && !isPatron,
-                            }"
-                            @click="playEpisode(item.id)"
-                        >
-                            <addSVG
-                                icon="play"
-                                :showIconIf="
-                                    zPlayer.id != item.id || !zPlayer.isPlaying
-                                "
-                            />
-                            <addSVG
-                                icon="pause"
-                                :showIconIf="
-                                    zPlayer.id == item.id && zPlayer.isPlaying
-                                "
-                            />
-                        </div>
+                        <template v-if="!item.patreon || isPatron">
+                            <div
+                                class="episode__play-btn"
+                                :class="{
+                                    playing: zPlayer.id == item.id,
+                                    disabled: item.patreon && !isPatron,
+                                }"
+                                @click="playEpisode(item.id)"
+                            >
+                                <addSVG
+                                    icon="play"
+                                    :showIconIf="
+                                        zPlayer.id != item.id ||
+                                        !zPlayer.isPlaying
+                                    "
+                                />
+                                <addSVG
+                                    icon="pause"
+                                    :showIconIf="
+                                        zPlayer.id == item.id &&
+                                        zPlayer.isPlaying
+                                    "
+                                />
+                            </div>
+                        </template>
+                        <template v-if="item.patreon && !isPatron">
+                            <div
+                                class="episode__play-btn disabled pointer"
+                                @click="togglePatronModal"
+                            >
+                                <addSVG icon="lock" />
+                            </div>
+                        </template>
                         <div class="episode__main">
                             <h2 class="episode__header">
                                 {{ formatTitle(item.title) }}
@@ -760,10 +780,7 @@
                                         (!item.patreon || isPatron)
                                     "
                                     @click="toggleTrackInPlaylist(item)"
-                                    class="
-                                        subline__item
-                                        episode__add-to-playlist
-                                    "
+                                    class="subline__item episode__add-to-playlist"
                                 >
                                     <!-- <addSVG icon="playlist-add" />  -->
                                     <span class="nowrap">
@@ -792,6 +809,12 @@
                                 >
                                     {{ formatDuration(item.duration) }}
                                 </span>
+                                <span
+                                    v-if="item.patreon"
+                                    class="subline__item episode__pubdate"
+                                >
+                                    {{ formatDate(item.pubDate) }}
+                                </span>
                                 <!-- <span class="subline__item episode__listenings">
                   <addSVG icon="headphones" />
                   <span class="nowrap">
@@ -809,6 +832,7 @@
                                     Для патронов
                                 </span>
                                 <span
+                                    title="Открыть/закрыть описание"
                                     v-if="!item.patreon"
                                     @click="toggleDescription(item.id)"
                                     class="subline__item episode__about"
@@ -842,8 +866,9 @@
                                     class="subline__item episode__share share"
                                     @click="toggleShare(item.id)"
                                     :class="{
-                                        episode__about_active:
-                                            openedShare.includes(item.id),
+                                        episode__about_active: openedShare.includes(
+                                            item.id
+                                        ),
                                     }"
                                 >
                                     <addSVG icon="share" />
@@ -938,7 +963,10 @@
                         <!-- <transition name="fade"> -->
                         <div
                             class="episode__description"
-                            v-if="openedDescriptions.includes(item.id)"
+                            v-if="
+                                openedDescriptions.includes(item.id) &&
+                                !item.patreon
+                            "
                         >
                             <div class="episode__description-text">
                                 <div class="episode__description-header">
@@ -1012,10 +1040,7 @@
                 </div>
             </div>
         </div>
-        <!-- <div class="playlist-bubble">
 
-
-</div> -->
         <div
             class="player player-container"
             :class="isMobile ? 'player-mobile' : ''"
@@ -1198,9 +1223,8 @@
 </template>
 
 <script>
-/* eslint-disable */
+import { loadEpisodes } from './api'
 import podcastJSON from '../api/podcast.json'
-// import episodesJSON from "../api/episodes.json";
 import { VueDraggableNext } from 'vue-draggable-next'
 import addSVG from './components/addSVG.vue'
 
@@ -1225,27 +1249,32 @@ export default {
             plylsts: [
                 {
                     name: 'Тим Урбан. История под названием МЫ',
-                    img: 'https://newochem.io/wp-content/uploads/2020/01/28-2-1024x995.png',
+                    img:
+                        'https://newochem.io/wp-content/uploads/2020/01/28-2-1024x995.png',
                     episodes: [273, 283, 284, 294, 307, 311, 331, 361],
                 },
                 {
                     name: 'Интересное про COVID',
-                    img: 'https://news.liga.net/images/general/2021/07/19/thumbnail-tw-20210719075417-1207.jpg?v=1626672933',
+                    img:
+                        'https://news.liga.net/images/general/2021/07/19/thumbnail-tw-20210719075417-1207.jpg?v=1626672933',
                     episodes: [313, 298, 296, 295, 276],
                 },
                 {
                     name: 'Искусственный интеллект',
-                    img: 'https://www.jewish-museum.ru/upload/resize_cache/iblock/746/707_470_2/7466b0935ef0922abf8ef756c5b8a474.jpg',
+                    img:
+                        'https://www.jewish-museum.ru/upload/resize_cache/iblock/746/707_470_2/7466b0935ef0922abf8ef756c5b8a474.jpg',
                     episodes: [353, 285, 262, 229, 214, 95, 26, 8],
                 },
                 {
                     name: 'О психиатрии и ментальных расстройствах',
-                    img: 'https://i.obozrevatel.com/attachment/2020/2/10/8dc72c.jpg',
+                    img:
+                        'https://i.obozrevatel.com/attachment/2020/2/10/8dc72c.jpg',
                     episodes: [350, 327, 309, 289, 240, 235, 206, 40],
                 },
                 {
                     name: 'Для миллениалов',
-                    img: 'https://ic.pics.livejournal.com/valerongrach/21518748/104989/104989_900.jpg',
+                    img:
+                        'https://ic.pics.livejournal.com/valerongrach/21518748/104989/104989_900.jpg',
                     episodes: [272, 268, 203, 194, 160, 77, 37],
                 },
             ],
@@ -1275,6 +1304,7 @@ export default {
             sortListeningsDESC: null,
             sortDateDESC: true,
             sortDuration: null,
+            showPatronEpisodes: true,
             episodesPerPage: 40,
             page: 1,
             nextPage: false,
@@ -1304,28 +1334,14 @@ export default {
     },
     created() {},
     mounted() {
+        // this.setPropFromLocalStorage('patronEmail')
         this.setPropFromLocalStorage('episodes')
-        // fetch("http://localhost:80/api/episodes")
-        fetch('https://podcast.newochem.io/api/episodes')
-            .then((response) => {
-                return response.json()
-            })
-            .then((data) => {
-                if (
-                    data.episodes &&
-                    this.episodes.length != data.episodes.length &&
-                    data.episodes.length > 0
-                ) {
-                    this.episodes = data.episodes
-                    this.addPlayerJS()
-                    this.paging()
-                }
-                // this.toggleSortByDate()
-            })
-            .catch((err) => {
-                console.log(err)
-                this.addPlayerJS()
-            })
+        if (this.episodes.length) {
+            this.paging()
+            this.addPlayerJS()
+        }
+
+        this.setEpisodes()
 
         this.checkIsMobile()
 
@@ -1335,26 +1351,26 @@ export default {
         this.setPropFromLocalStorage('zPlayer')
         this.zPlayer.isPlaying = false
 
-        if (this.episodes.length) {
-            this.addPlayerJS()
-            this.paging()
-        }
-
         window.onresize = () => {
             this.checkIsMobile()
         }
         window.onscroll = () => {
             this.scrollY = window.scrollY
         }
-        window.addEventListener('popstate', function (e) {
+        window.addEventListener('popstate', function () {
             window.location.href = location.href
         })
-        this.getPatronsEpisodes()
     },
     watch: {
         player: {
-            handler(newVal, oldVal) {
-                if (newVal && this.URLData.hasOwnProperty('playlist')) {
+            handler(newVal) {
+                if (
+                    newVal &&
+                    Object.prototype.hasOwnProperty.call(
+                        this.URLData,
+                        'playlist'
+                    )
+                ) {
                     this.playPlylst(this.URLData.playlist.split('-'), '', false)
                     this.playlistName = decodeURI(this.URLData.playlistName)
                     if (this.isMobile) {
@@ -1368,7 +1384,7 @@ export default {
             deep: true,
         },
         episodes: {
-            handler(newVal, oldVal) {
+            handler(newVal) {
                 localStorage.setItem('episodes', JSON.stringify(newVal))
 
                 if (this.URLData.ep) {
@@ -1411,13 +1427,13 @@ export default {
             deep: true,
         },
         zPlayer: {
-            handler(zPlayer, oldVal) {
+            handler(zPlayer) {
                 localStorage.setItem('zPlayer', JSON.stringify(zPlayer))
             },
             deep: true,
         },
         userPlaylists: {
-            handler(newUserPlaylists, oldUserPLaylist) {
+            handler(newUserPlaylists) {
                 localStorage.setItem(
                     'userPlalists',
                     JSON.stringify(newUserPlaylists)
@@ -1425,15 +1441,34 @@ export default {
             },
             deep: true,
         },
-        isMobile(newVal, oldVal) {
+        isMobile(newVal) {
             if (newVal == true && !this.sharedTrack) {
                 this.openMobileAbout()
             } else {
                 this.openMobileEpisodes()
             }
         },
+        isPatron(newVal) {
+            if (newVal == true) {
+                localStorage.setItem('patronEmail', this.patronEmail)
+            }
+        },
     },
     methods: {
+        setEpisodes() {
+            loadEpisodes(this.patronEmail).then((episodes) => {
+                // if (this.episodes.length < episodes.length) {
+                this.episodes = episodes
+                this.paging()
+                this.sortByDate()
+                if (!this.player) {
+                    this.addPlayerJS()
+                } else {
+                    this.setPlaylist()
+                }
+                // }
+            })
+        },
         async getPatronsEpisodes() {
             for (let i = 0; i < this.episodes.length; i++) {
                 if (this.episodes[i].patreon) {
@@ -1457,6 +1492,9 @@ export default {
                     console.log(err)
                 })
         },
+        setPlaylist() {
+            this.player.api('file', this.getPlaylist())
+        },
         async loginAsPatron() {
             this.patronLoading = true
             this.patronMessage = null
@@ -1479,7 +1517,7 @@ export default {
                             setTimeout(() => {
                                 this.showPatronModal = false
                             }, 800)
-                            this.getPatronsEpisodes()
+                            this.setEpisodes()
                         }
                     })
                     .catch((err) => {
@@ -1494,8 +1532,7 @@ export default {
             }
         },
         validateEmail(email) {
-            const re =
-                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
             return re.test(String(email).toLowerCase())
         },
         setURLData() {
@@ -1517,7 +1554,7 @@ export default {
             this.windowWidth = window.innerWidth
             this.isMobile = this.windowWidth > 768 ? false : true
         },
-        addPlayerJS() {
+        async addPlayerJS() {
             const script = document.createElement('script')
             script.async = true
             script.src = './js/playerjs.js'
@@ -1565,7 +1602,7 @@ export default {
 
             this.playerNode.addEventListener('play', () => {
                 this.zPlayer.isPlaying = true
-                this.playerNode.addEventListener('time', (e) => {
+                this.playerNode.addEventListener('time', () => {
                     if (!this.mousepress) {
                         this.zPlayer.time = this.player.api('time')
                     }
@@ -1580,7 +1617,7 @@ export default {
                     }
                 })
             })
-            this.playerNode.addEventListener('pause', (e) => {
+            this.playerNode.addEventListener('pause', () => {
                 this.zPlayer.isPlaying = false
             })
         },
@@ -1590,12 +1627,14 @@ export default {
         getPlaylist() {
             const playlist = []
             this.episodes.forEach((episode) => {
-                let item = {
-                    title: episode.title,
-                    file: episode.enclosure.url,
-                    id: episode.id,
+                if (episode.enclosure.url) {
+                    let item = {
+                        title: episode.title,
+                        file: episode.enclosure.url,
+                        id: episode.id,
+                    }
+                    playlist.push(item)
                 }
-                playlist.push(item)
             })
             return playlist
         },
@@ -1913,8 +1952,7 @@ export default {
             return `${day} ${months[numerOfMonth]} ${year}`
         },
         formatDescriprion(text) {
-            var re =
-                /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\/%?=~_()|!:,.;]*[-a-z0-9+&@#\/%=~_()|])/gi
+            var re = /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\\/%?=~_()|!:,.;]*[-a-z0-9+&@#/%=~_()|])/gi
             return text.replace(re, function (match, lParens, url) {
                 var rParens = ''
                 lParens = lParens || ''
@@ -1948,7 +1986,7 @@ export default {
             var sec_num = parseInt(seconds, 10) // don't forget the second param
             var hours = Math.floor(sec_num / 3600)
             var minutes = Math.floor((sec_num - hours * 3600) / 60)
-            var seconds = sec_num - hours * 3600 - minutes * 60
+            seconds = sec_num - hours * 3600 - minutes * 60
 
             if (hours < 10) {
                 hours = '0' + hours
@@ -2256,7 +2294,7 @@ export default {
             input.innerHTML = email
             document.body.appendChild(input)
             input.select()
-            var result = document.execCommand('copy')
+            document.execCommand('copy')
             document.body.removeChild(input)
 
             this.$refs.email.textContent = 'Скопировано'
@@ -2270,7 +2308,7 @@ export default {
             input.innerHTML = text
             document.body.appendChild(input)
             input.select()
-            var result = document.execCommand('copy')
+            document.execCommand('copy')
             document.body.removeChild(input)
 
             if (el) {
@@ -2302,6 +2340,9 @@ export default {
                 this[prop] = JSON.parse(localStorage.getItem(prop))
             }
         },
+        toggleShowPatronEpisodes() {
+            this.showPatronEpisodes = !this.showPatronEpisodes
+        },
         // deleteSharedTrack() {
         //   this.sharedTrack = null;
         //   this.playlistActive = !this.playlistActive;
@@ -2315,22 +2356,25 @@ export default {
     computed: {
         mergeByID() {
             var hash = {} // временный хэш объектов по свойству id
+            var id
             for (var l = 0; l < arguments.length; l++) {
                 var arr = arguments[l]
                 if (!arr.length) continue
                 for (var i = 0; i < arr.length; i++) {
                     var el = arr[i]
                     if (!('id' in el)) continue
-                    var id = el.id
+                    id = el.id
                     if (!hash[id]) hash[id] = {}
                     for (var key in el) {
-                        if (el.hasOwnProperty(key)) hash[id][key] = el[key]
+                        if (Object.prototype.hasOwnProperty.call(el, key))
+                            hash[id][key] = el[key]
                     }
                 }
             }
             var result = []
-            for (var id in hash) {
-                if (hash.hasOwnProperty(id)) result.push(hash[id])
+            for (id in hash) {
+                if (Object.prototype.hasOwnProperty.call(hash, id))
+                    result.push(hash[id])
             }
             return result
         },
@@ -2588,8 +2632,8 @@ input::-webkit-search-results-decoration {
         width: max-content;
         cursor: default;
         z-index: 9;
-        width: 220px;
         transition: 0.3s;
+        min-width: 250px;
 
         div {
             padding: 8px 12px;
@@ -2599,7 +2643,8 @@ input::-webkit-search-results-decoration {
             align-items: center;
             span:first-child {
                 flex: auto;
-                height: 23px;
+                // height: 23px;
+                padding-right: 5px;
             }
             &:hover {
                 background: var(--site-bg);
@@ -2928,12 +2973,12 @@ input::-webkit-search-results-decoration {
         }
     }
 
-    // &__duration {
-    //   margin-right: 16px;
-    //   @media (max-width: 768px) {
-    //     margin-right: 12px;
-    //   }
-    // }
+    &__pubdate {
+        margin-left: 8px;
+        // @media (max-width: 768px) {
+        //     margin-left: 12px;
+        // }
+    }
 
     &__add-to-playlist {
         cursor: pointer;
@@ -3992,12 +4037,16 @@ input::-webkit-search-results-decoration {
     }
 }
 
+.pointer {
+    cursor: pointer;
+}
+
 .player-container {
     max-width: var(--container-width);
     margin: 0 auto;
 }
 
-.donate-modal {
+.modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -4387,5 +4436,20 @@ input::-webkit-search-results-decoration {
     // top: -8px;
     // left: 0;
     margin-left: 10px;
+}
+
+.eye {
+    // svg {
+    //     fill: transparent;
+    //     polygon,
+    //     path,
+    //     circle {
+    //         stroke: #fff;
+    //     }
+    // }
+}
+
+.unvisible {
+    display: none;
 }
 </style>
