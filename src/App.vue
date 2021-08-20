@@ -731,6 +731,7 @@
                         :class="{
                             playing: zPlayer.id == item.id,
                             unvisible: !showPatronEpisodes && item.patreon,
+                            'patreon-bg': item.patreon && !isPatron,
                         }"
                         :id="item.id"
                         v-for="item in podcastDisplayedEpisodes"
@@ -4451,5 +4452,15 @@ input::-webkit-search-results-decoration {
 
 .unvisible {
     display: none;
+}
+
+.patreon-bg {
+    background: #35383d;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+
+    &:hover {
+        opacity: 1;
+    }
 }
 </style>

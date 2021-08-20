@@ -14,7 +14,9 @@ const RSS_URL = 'https://podster.fm/rss.xml?pid=48291'
 const PATREON_RSS_URL =
     'https://www.patreon.com/rss/newochem?auth=XPyveZC4v9PFsa2KFDOXQ2BuWrJWBYO-'
 let intervalOfUpdating = 14400000 // 4 hours
-let epsodesCachedFromDB
+let episodesCachedFromDB
+let episodesPatronUrlsCachedFromRSS
+let episodesPatronNoUrlsCachedFromRSS
 
 // main logic
 async function updateEpisodesAPI() {
@@ -30,8 +32,18 @@ async function updateEpisodesAPI() {
 }
 
 updateEpisodesAPI()
-setInterval(() => {
-    updateEpisodesAPI()
+getEpisodesArrayFromPatreonRSS(true).then(
+    (episodes) => (episodesPatronUrlsCachedFromRSS = episodes)
+)
+getEpisodesArrayFromPatreonRSS(false).then(
+    (episodes) => (episodesPatronNoUrlsCachedFromRSS = episodes)
+)
+setInterval(async () => {
+    await updateEpisodesAPI()
+    episodesPatronUrlsCachedFromRSS = await getEpisodesArrayFromPatreonRSS(true)
+    episodesPatronNoUrlsCachedFromRSS = await getEpisodesArrayFromPatreonRSS(
+        false
+    )
 }, intervalOfUpdating)
 
 // end of main logic
@@ -42,13 +54,19 @@ app.use(cors())
 const port = 80
 
 app.get('/api/episodes', async (req, res) => {
-    res.send(epsodesCachedFromDB)
+    res.send(episodesCachedFromDB)
 })
 app.get('/api/patreon-episodes', async (req, res) => {
     let email = req.query.email
     let isPatron = await checkIsPatron(email)
-    let episodes = await getEpisodesArrayFromPatreonRSS(isPatron)
-    res.send({ episodes })
+    let episodes
+    if (isPatron) {
+        episodes = episodesPatronUrlsCachedFromRSS
+        res.send({ episodes })
+    } else {
+        episodes = episodesPatronNoUrlsCachedFromRSS
+        res.send({ episodes })
+    }
 })
 app.get('/api/isPatron', async (req, res) => {
     let email = req.query.email
@@ -107,7 +125,14 @@ async function getEpisodesArrayFromPatreonRSS(isPatron = false) {
     let episodes = rss.episodes
     shortEpisodes = []
     episodes.forEach((episode, index) => {
-        if (episode.title.includes('Короткий Newочём')) {
+        if (
+            episode.title.includes('Короткий Newочём') ||
+            episode.title.includes('Один день на Венере') ||
+            episode.title.includes('Нечеловеческая жизнь внутри нас') ||
+            episode.title.includes(
+                'История об охотнике за привидением в лаборатории'
+            )
+        ) {
             episode.id = 'p' + index
             episode.duration = Math.round(
                 ((episode.enclosure.length / 1024) * 8) / 192
@@ -159,7 +184,7 @@ async function checkIsPatron(email) {
 // TOOLS: DB
 async function cacheEpisodesFromDB() {
     getEpisodesFromDB().then((episodes) => {
-        epsodesCachedFromDB = episodes
+        episodesCachedFromDB = episodes
         console.log('Episodes is cached')
     })
 }
