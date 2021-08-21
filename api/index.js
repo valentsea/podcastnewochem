@@ -124,6 +124,7 @@ async function getEpisodesArrayFromPatreonRSS(isPatron = false) {
 
     let episodes = rss.episodes
     shortEpisodes = []
+
     episodes.forEach((episode, index) => {
         if (
             episode.title.includes('Короткий Newочём') ||
@@ -133,7 +134,7 @@ async function getEpisodesArrayFromPatreonRSS(isPatron = false) {
                 'История об охотнике за привидением в лаборатории'
             )
         ) {
-            episode.id = 'p' + index
+            episode.id = 'p' + (episodes.length - index + 1)
             episode.duration = Math.round(
                 ((episode.enclosure.length / 1024) * 8) / 192
             )
