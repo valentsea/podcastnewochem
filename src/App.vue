@@ -98,7 +98,13 @@
                         <p v-html="podcast.description"></p>
                     </div>
                     <div class="info-button-wrapper">
-                        <span v-if="isMinimizedInfo" class="minimized-title">
+                        <span
+                            v-if="isMinimizedInfo"
+                            class="minimized-title"
+                            @click="showInfo"
+                        >
+                            <addSVG v-if="!isMobile" icon="arrow-left" />
+
                             {{ podcast.name }}
                         </span>
                         <span class="donate-btns">
@@ -128,6 +134,14 @@
                             >
                                 Вы наш патрон
                             </a>
+                            <span
+                                v-if="isPatron"
+                                class="button"
+                                style="padding: 10px 12px"
+                                @click="logout"
+                            >
+                                Выйти
+                            </span>
                         </span>
                     </div>
 
@@ -154,11 +168,12 @@
                 </div>
                 <span
                     v-if="!isPatron"
+                    v-show="!isMinimizedInfo"
                     @click="togglePatronModal"
                     class="button"
-                    style="padding: 10px 12px"
+                    style="margin-top: 20px"
                 >
-                    Я патрон Newочём
+                    Вход для патронов
                 </span>
 
                 <div class="listen" v-show="!isMinimizedInfo">
@@ -287,7 +302,6 @@
                             : ''
                     "
                 >
-                    <template v-if="isMinimizedInfo"> Развернуть </template>
                     <template v-if="!isMinimizedInfo"> Свернуть </template>
                 </button>
                 <div
@@ -301,6 +315,7 @@
                             <input
                                 ref="playlistName"
                                 v-model="playlistName"
+                                :title="playlistName"
                                 type="text"
                                 placeholder="Название плейлиста"
                                 class="playlist__heading"
@@ -394,7 +409,10 @@
                                                     playing:
                                                         zPlayer.id == track.id,
                                                 }"
-                                                class="playlist__track playlist-track"
+                                                class="
+                                                    playlist__track
+                                                    playlist-track
+                                                "
                                             >
                                                 <div
                                                     class="playlist-track__play"
@@ -426,7 +444,9 @@
                                                     :title="
                                                         getTitleByID(track.id)
                                                     "
-                                                    class="playlist-track__title"
+                                                    class="
+                                                        playlist-track__title
+                                                    "
                                                     @click="
                                                         playEpisode(track.id)
                                                     "
@@ -435,13 +455,29 @@
                                                 </div>
 
                                                 <div
+                                                    title="Открыть выпуск"
+                                                    @click="
+                                                        showSharedTrack(
+                                                            track.id
+                                                        )
+                                                    "
+                                                    class="playlist-track__open"
+                                                >
+                                                    <addSVG icon="open" />
+                                                </div>
+                                                <div
                                                     title="Переместить"
-                                                    class="playlist-track__handle handle"
+                                                    class="
+                                                        playlist-track__handle
+                                                        handle
+                                                    "
                                                 >
                                                     <addSVG icon="drag" />
                                                 </div>
                                                 <div
-                                                    class="playlist-track__duration"
+                                                    class="
+                                                        playlist-track__duration
+                                                    "
                                                 >
                                                     {{
                                                         toHHMMSS(track.duration)
@@ -449,7 +485,9 @@
                                                 </div>
                                                 <div
                                                     title="Убрать из плейлиста"
-                                                    class="playlist-track__remove"
+                                                    class="
+                                                        playlist-track__remove
+                                                    "
                                                     @click="
                                                         toggleTrackInPlaylist(
                                                             track
@@ -693,6 +731,7 @@
                             <div class="plylst__name">{{ plst.name }}</div>
                             <div class="plylst__tooltip">Ваш плейлист</div>
                             <div
+                                title="Удалить плейлист"
                                 class="plylst__delete"
                                 @click.stop="deleteUserPlaylist(index)"
                             >
@@ -781,7 +820,10 @@
                                         (!item.patreon || isPatron)
                                     "
                                     @click="toggleTrackInPlaylist(item)"
-                                    class="subline__item episode__add-to-playlist"
+                                    class="
+                                        subline__item
+                                        episode__add-to-playlist
+                                    "
                                 >
                                     <!-- <addSVG icon="playlist-add" />  -->
                                     <span class="nowrap">
@@ -867,9 +909,8 @@
                                     class="subline__item episode__share share"
                                     @click="toggleShare(item.id)"
                                     :class="{
-                                        episode__about_active: openedShare.includes(
-                                            item.id
-                                        ),
+                                        episode__about_active:
+                                            openedShare.includes(item.id),
                                     }"
                                 >
                                     <addSVG icon="share" />
@@ -1250,32 +1291,28 @@ export default {
             plylsts: [
                 {
                     name: 'Тим Урбан. История под названием МЫ',
-                    img:
-                        'https://newochem.io/wp-content/uploads/2020/01/28-2-1024x995.png',
+                    img: './img/playlists/tim-urban.png',
+
                     episodes: [273, 283, 284, 294, 307, 311, 331, 361],
                 },
                 {
                     name: 'Интересное про COVID',
-                    img:
-                        'https://news.liga.net/images/general/2021/07/19/thumbnail-tw-20210719075417-1207.jpg?v=1626672933',
+                    img: './img/playlists/covid.jpg',
                     episodes: [313, 298, 296, 295, 276],
                 },
                 {
                     name: 'Искусственный интеллект',
-                    img:
-                        'https://www.jewish-museum.ru/upload/resize_cache/iblock/746/707_470_2/7466b0935ef0922abf8ef756c5b8a474.jpg',
+                    img: './img/playlists/AI.jpg',
                     episodes: [353, 285, 262, 229, 214, 95, 26, 8],
                 },
                 {
                     name: 'О психиатрии и ментальных расстройствах',
-                    img:
-                        'https://i.obozrevatel.com/attachment/2020/2/10/8dc72c.jpg',
+                    img: './img/playlists/mental-illnes.jpg',
                     episodes: [350, 327, 309, 289, 240, 235, 206, 40],
                 },
                 {
                     name: 'Для миллениалов',
-                    img:
-                        'https://ic.pics.livejournal.com/valerongrach/21518748/104989/104989_900.jpg',
+                    img: './img/playlists/millenialsjpg.jpg',
                     episodes: [272, 268, 203, 194, 160, 77, 37],
                 },
             ],
@@ -1335,7 +1372,8 @@ export default {
     },
     created() {},
     mounted() {
-        // this.setPropFromLocalStorage('patronEmail')
+        this.setPropFromLocalStorage('patronEmail')
+        this.setPropFromLocalStorage('isPatron')
         this.setPropFromLocalStorage('episodes')
         if (this.episodes.length) {
             this.paging()
@@ -1373,7 +1411,12 @@ export default {
                     )
                 ) {
                     this.playPlylst(this.URLData.playlist.split('-'), '', false)
-                    this.playlistName = decodeURI(this.URLData.playlistName)
+                    console.log(decodeURI(this.URLData.playlistName))
+                    if (decodeURI(this.URLData.playlistName) == 'undefined') {
+                        this.playlistName = ''
+                    } else {
+                        this.playlistName = decodeURI(this.URLData.playlistName)
+                    }
                     if (this.isMobile) {
                         this.openMobileAbout()
                     }
@@ -1419,6 +1462,9 @@ export default {
         },
         playlistName: {
             handler: function (newVal) {
+                if (newVal == undefined || newVal == 'undefined') {
+                    newVal = ''
+                }
                 const urlParams = new URLSearchParams(window.location.search)
                 urlParams.set('playlistName', newVal)
                 const url = new URL(location)
@@ -1450,15 +1496,17 @@ export default {
             }
         },
         isPatron(newVal) {
-            if (newVal == true) {
-                localStorage.setItem('patronEmail', this.patronEmail)
-            }
+            localStorage.setItem(
+                'patronEmail',
+                JSON.stringify(this.patronEmail)
+            )
+            localStorage.setItem('isPatron', JSON.stringify(newVal))
         },
     },
     methods: {
         setEpisodes() {
             loadEpisodes(this.patronEmail).then((episodes) => {
-                // if (this.episodes.length < episodes.length) {
+                // if (this.episodes.length != episodes.length || this.isPatron) {
                 this.episodes = episodes
                 this.paging()
                 this.sortByDate()
@@ -1477,7 +1525,7 @@ export default {
                 }
             }
             fetch(
-                `http://localhost:80/api/patreon-episodes?email=${this.patronEmail}`
+                `https://podcast.newochem.io/api/patreon-episodes?email=${this.patronEmail}`
             )
                 .then((response) => {
                     return response.json()
@@ -1501,7 +1549,7 @@ export default {
             this.patronMessage = null
             if (this.patronEmail && this.validateEmail(this.patronEmail)) {
                 fetch(
-                    `http://localhost:80/api/isPatron?email=${this.patronEmail}`
+                    `https://podcast.newochem.io/api/isPatron?email=${this.patronEmail}`
                 )
                     .then((response) => {
                         return response.json()
@@ -1512,7 +1560,7 @@ export default {
                                 'Нет такого мейла ни у кого из наших патронов :('
                             this.patronLoading = false
                         } else {
-                            this.patronMessage = 'Отлично!'
+                            this.patronMessage = 'Отлично! Вы вошли как патрон.'
                             this.isPatron = data.isPatron
 
                             setTimeout(() => {
@@ -1532,8 +1580,16 @@ export default {
                 return false
             }
         },
+        logout() {
+            this.patronLoading = false
+            this.patronMessage = ''
+            this.isPatron = false
+            this.patronEmail = ''
+            this.setEpisodes()
+        },
         validateEmail(email) {
-            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            const re =
+                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
             return re.test(String(email).toLowerCase())
         },
         setURLData() {
@@ -1561,9 +1617,13 @@ export default {
             script.src = './js/playerjs.js'
             document.head.appendChild(script)
 
-            script.addEventListener('load', () => {
-                this.initPlayerJS()
-            })
+            script.addEventListener(
+                'load',
+                () => {
+                    this.initPlayerJS()
+                },
+                { passive: true }
+            )
         },
         initPlayerJS() {
             this.player = new window.Playerjs({
@@ -1672,6 +1732,13 @@ export default {
                 this.nextPage = false
             }
         },
+        showInfo() {
+            if (this.isMobile) {
+                this.openMobileAbout()
+                return
+            }
+            this.isMinimizedInfo = !this.isMinimizedInfo
+        },
         loadmore() {
             this.page++
             this.paging()
@@ -1776,6 +1843,7 @@ export default {
             this.showPlaylists = false
             this.isSearchActive = !this.isSearchActive
             this.searchResults = this.episodes
+            this.viewAll()
             if (this.isSearchActive) {
                 setTimeout(() => {
                     this.$refs.search.focus()
@@ -1953,7 +2021,8 @@ export default {
             return `${day} ${months[numerOfMonth]} ${year}`
         },
         formatDescriprion(text) {
-            var re = /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\\/%?=~_()|!:,.;]*[-a-z0-9+&@#/%=~_()|])/gi
+            var re =
+                /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\\/%?=~_()|!:,.;]*[-a-z0-9+&@#/%=~_()|])/gi
             return text.replace(re, function (match, lParens, url) {
                 var rParens = ''
                 lParens = lParens || ''
@@ -2189,8 +2258,6 @@ export default {
             }, 10)
         },
         createCustomPlaylist() {
-            this.playlistName = 'Новый плейлист'
-
             this.emptyPlaylist()
             this.openPlaylist()
             this.playlistsShow()
@@ -2225,7 +2292,7 @@ export default {
         savePlaylist() {
             this.playlistName = this.playlistName
                 ? this.playlistName
-                : 'Пользовательский плейлист'
+                : 'Новая подборка'
 
             let episodesIds = []
             this.playlist.forEach((ep) => episodesIds.push(ep.id))
@@ -2449,7 +2516,7 @@ button,
     background: var(--btn-color);
     border: 0;
     color: var(--text-color);
-    padding: 10px 20px;
+    padding: 10px 18px;
     margin-bottom: 20px;
     margin-right: 14px;
     cursor: pointer;
@@ -2482,7 +2549,7 @@ button,
 
 input::-webkit-search-decoration,
 input::-webkit-search-cancel-button,
-input::-webkit-search-results-button,
+input::-t-search-results-button,
 input::-webkit-search-results-decoration {
     display: none;
 }
@@ -2538,7 +2605,7 @@ input::-webkit-search-results-decoration {
     }
 
     @media (max-width: 768px) {
-        padding: 20px 30px 50px;
+        padding: 20px 30px 30px;
     }
 
     &__img {
@@ -2680,6 +2747,23 @@ input::-webkit-search-results-decoration {
         font-size: 14px;
         outline: none;
     }
+}
+
+input[type='text']::-ms-clear {
+    display: none;
+    width: 0;
+    height: 0;
+}
+input[type='text']::-ms-reveal {
+    display: none;
+    width: 0;
+    height: 0;
+}
+input[type='search']::-webkit-search-decoration,
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-results-button,
+input[type='search']::-webkit-search-results-decoration {
+    display: none;
 }
 
 .nothing {
@@ -3217,7 +3301,7 @@ input::-webkit-search-results-decoration {
         justify-content: space-between;
         align-items: center;
         padding: 10px 26px;
-
+        box-sizing: border-box;
         @media (max-width: 768px) {
             padding: 12px 15px 12px;
         }
@@ -3225,6 +3309,7 @@ input::-webkit-search-results-decoration {
     &__main-left {
         display: flex;
         align-items: center;
+        flex: auto;
     }
     &__main-right {
         display: flex;
@@ -3235,13 +3320,14 @@ input::-webkit-search-results-decoration {
     &__next {
         cursor: pointer;
         width: 35px;
-        margin-right: 12px;
-        opacity: 0.6;
+        margin-right: 6px;
 
         @include button-effect;
 
         svg {
             fill: #fff;
+            width: 30px;
+            height: 30px;
         }
     }
 
@@ -3254,9 +3340,13 @@ input::-webkit-search-results-decoration {
         text-overflow: ellipsis;
         overflow: hidden;
         @media (max-width: 768px) {
-            max-width: 120px;
             font-size: 13px;
             margin-bottom: 0;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+            white-space: break-spaces;
         }
     }
 
@@ -3390,6 +3480,9 @@ input::-webkit-search-results-decoration {
             // margin-bottom: 3px;
             fill: #fff;
         }
+        @media (max-width: 768px) {
+            margin-left: 6px;
+        }
     }
 
     &__playlist {
@@ -3414,6 +3507,9 @@ input::-webkit-search-results-decoration {
         cursor: pointer;
         @include button-effect;
         @include unselectable;
+        @media (max-width: 768px) {
+            margin-left: 8px;
+        }
     }
 }
 .sortable-chosen {
@@ -3647,13 +3743,19 @@ input::-webkit-search-results-decoration {
         text-align: right;
         margin-top: 14px;
         margin-left: 8px;
-        @include button-effect;
         @include unselectable;
     }
 
     &__duration {
         margin-left: 0;
         cursor: default;
+        opacity: 0.6;
+    }
+
+    &__make-empty {
+        margin-left: 0;
+        cursor: default;
+        @include button-effect;
     }
 
     &__tracklist {
@@ -3685,7 +3787,11 @@ input::-webkit-search-results-decoration {
         }
 
         &::-webkit-scrollbar-thumb {
-            background-color: var(--text-color); /* color of the scroll thumb */
+            background-color: rgb(
+                180,
+                180,
+                180
+            ); /* color of the scroll thumb */
             border-radius: 20px; /* roundness of the scroll thumb */
             opacity: 0.6;
             transition: 0.3s;
@@ -3720,6 +3826,7 @@ input::-webkit-search-results-decoration {
     position: relative;
 
     &:hover {
+        .playlist-track__open,
         .playlist-track__handle,
         .playlist-track__remove {
             opacity: 0.4;
@@ -3751,6 +3858,7 @@ input::-webkit-search-results-decoration {
         overflow: hidden;
         flex: auto;
     }
+    &__open,
     &__handle,
     &__remove {
         justify-self: end;
@@ -3779,6 +3887,13 @@ input::-webkit-search-results-decoration {
         svg {
             width: 10px;
             height: 10px;
+            fill: #fff;
+        }
+    }
+    &__open {
+        svg {
+            width: 12px;
+            height: 12px;
             fill: #fff;
         }
     }
@@ -4031,10 +4146,10 @@ input::-webkit-search-results-decoration {
 }
 
 .disabled {
-    opacity: 0.1;
+    opacity: 0.3;
     cursor: default;
     &:hover {
-        opacity: 0.1;
+        opacity: 0.3;
     }
 }
 
@@ -4071,13 +4186,13 @@ input::-webkit-search-results-decoration {
     &__window {
         position: relative;
         margin: 40px 15px;
-        width: 500px;
+        width: 460px;
         height: fit-content;
         max-height: 90vh;
         background: #fff;
         z-index: 999;
         border-radius: var(--block-border-radius);
-        padding: 12px 30px 40px;
+        padding: 12px 30px 20px;
         overflow-y: auto;
         box-shadow: 0 0 10px black;
 
@@ -4187,9 +4302,18 @@ input::-webkit-search-results-decoration {
     height: 100%;
     letter-spacing: 0.4px;
     font-size: 18px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
     @include unselectable;
     @media (max-width: 768px) {
         font-size: 14px;
+    }
+    svg {
+        width: 10px;
+        height: 10px;
+        fill: #fff;
+        margin-right: 4px;
     }
 }
 
@@ -4408,13 +4532,13 @@ input::-webkit-search-results-decoration {
 .patron-login {
     display: flex;
     margin: 30px 0;
-    align-items: center;
     flex-wrap: wrap;
+
     input {
         color: var(--site-bg);
         border: 1px solid var(--site-bg);
-        padding: 5px 20px;
-        border-radius: var(--block-border-radius);
+        padding: 10px 20px;
+        border-radius: 8px;
         font-size: 14px;
         outline: none;
         max-width: 300px;
@@ -4424,6 +4548,7 @@ input::-webkit-search-results-decoration {
         width: fit-content;
         color: #fff;
         margin: 0;
+        margin-left: 10px;
     }
     .patron-message {
         width: 100%;
@@ -4455,7 +4580,7 @@ input::-webkit-search-results-decoration {
 }
 
 .patreon-bg {
-    background: #35383d;
+    background: #151418;
     opacity: 0.7;
     transition: opacity 0.3s;
 

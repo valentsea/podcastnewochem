@@ -25,7 +25,7 @@ async function loadPublicEpisodes() {
 
 async function loadPatronEpisodes(patronEmail) {
     return fetch(
-        `http://localhost:80/api/patreon-episodes?email=${patronEmail}`
+        `https://podcast.newochem.io/api/patreon-episodes?email=${patronEmail}`
     )
         .then((response) => {
             return response.json()
