@@ -62,6 +62,7 @@
                         id=""
                         v-model="patronEmail"
                         placeholder="Введите ваш email"
+                        @keyup.enter="loginAsPatron"
                     />
                     <input
                         :disabled="patronLoading"
@@ -776,11 +777,23 @@
                         v-for="item in podcastDisplayedEpisodes"
                         :key="item.id"
                     >
+                        <div class="episode__time-container">
+                            <div
+                                class="episode__time"
+                                :style="{
+                                    width: listenedEpisodes[item.id]
+                                        ? (listenedEpisodes[item.id] * 100) /
+                                              item.duration +
+                                          '%'
+                                        : '0%',
+                                }"
+                            ></div>
+                        </div>
                         <template v-if="!item.patreon || isPatron">
                             <div
                                 class="episode__play-btn"
                                 :class="{
-                                    playing: zPlayer.id == item.id,
+                                    'playing-btn': zPlayer.id == item.id,
                                     disabled: item.patreon && !isPatron,
                                 }"
                                 @click="playEpisode(item.id)"
@@ -1331,6 +1344,7 @@ export default {
                 speed: 1,
                 buffered: 0,
             },
+            listenedEpisodes: {},
             podcastDisplayedEpisodes: [],
             openedDescriptions: [],
             openedShare: [],
@@ -1386,6 +1400,7 @@ export default {
 
         this.setURLData()
 
+        this.setPropFromLocalStorage('listenedEpisodes')
         this.setPropFromLocalStorage('userPlalists')
         this.setPropFromLocalStorage('zPlayer')
         this.zPlayer.isPlaying = false
@@ -1399,6 +1414,7 @@ export default {
         window.addEventListener('popstate', function () {
             window.location.href = location.href
         })
+        this.addStopOnSpaceListener()
     },
     watch: {
         player: {
@@ -1411,7 +1427,6 @@ export default {
                     )
                 ) {
                     this.playPlylst(this.URLData.playlist.split('-'), '', false)
-                    console.log(decodeURI(this.URLData.playlistName))
                     if (decodeURI(this.URLData.playlistName) == 'undefined') {
                         this.playlistName = ''
                     } else {
@@ -1501,6 +1516,13 @@ export default {
                 JSON.stringify(this.patronEmail)
             )
             localStorage.setItem('isPatron', JSON.stringify(newVal))
+        },
+
+        listenedEpisodes: {
+            handler(newVal) {
+                localStorage.setItem('listenedEpisodes', JSON.stringify(newVal))
+            },
+            deep: true,
         },
     },
     methods: {
@@ -1639,16 +1661,19 @@ export default {
             this.zPlayerInit()
         },
         zPlayerInit() {
-            if (!this.zPlayer.title && this.episodes.length) {
-                this.zPlayer.title = this.episodes[0].title
-            }
             if (!this.zPlayer.id && this.episodes.length) {
-                this.zPlayer.id = this.episodes[0].id
+                this.player.api('file', 'id:' + this.episodes[0].id)
+                this.player.api('pause')
+            } else {
+                this.player.api('file', 'id:' + this.zPlayer.id)
+                this.player.api('pause')
             }
+
             this.playerNode.addEventListener('new', () => {
                 this.zPlayer.id = this.player.api('playlist_id')
                 this.zPlayer.title = this.player.api('playlist_title')
                 this.zPlayer.duration = 0
+
                 this.player.api('volume', this.zPlayer.volume)
                 let index = this.openedShare.indexOf(this.zPlayer.id)
                 if (index == -1) {
@@ -1663,9 +1688,20 @@ export default {
 
             this.playerNode.addEventListener('play', () => {
                 this.zPlayer.isPlaying = true
+                if (this.listenedEpisodes[this.zPlayer.id]) {
+                    console.log('aaaasdasdsadsad')
+                    this.player.api(
+                        'seek',
+                        this.listenedEpisodes[this.zPlayer.id]
+                    )
+                }
                 this.playerNode.addEventListener('time', () => {
                     if (!this.mousepress) {
                         this.zPlayer.time = this.player.api('time')
+                        if (Math.floor(this.zPlayer.time) != 0) {
+                            this.listenedEpisodes[this.zPlayer.id] =
+                                this.zPlayer.time
+                        }
                     }
                     this.zPlayer.buffered = this.player.api('buffered')
 
@@ -2397,7 +2433,10 @@ export default {
         },
         addStopOnSpaceListener() {
             document.addEventListener('keydown', (event) => {
-                if (event.code === 'Space') {
+                if (
+                    event.code === 'Space' &&
+                    document.activeElement.tagName.toLowerCase() != 'input'
+                ) {
                     event.preventDefault()
                     this.zPlayerToggle()
                 }
@@ -2699,7 +2738,7 @@ input::-webkit-search-results-decoration {
         box-shadow: 0 0 16px rgba(0, 0, 0, 0.308);
         width: max-content;
         cursor: default;
-        z-index: 9;
+        z-index: 20;
         transition: 0.3s;
         min-width: 250px;
 
@@ -2916,6 +2955,24 @@ input[type='search']::-webkit-search-results-decoration {
     flex-wrap: wrap;
     transition: 0.3s;
     position: relative;
+
+    &__time-container {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        border-radius: var(--block-border-radius);
+        overflow: hidden;
+    }
+
+    &__time {
+        position: absolute;
+        height: 100%;
+        background: rgb(74 70 88 / 19%);
+        top: 0;
+        left: 0;
+    }
     @media (max-width: 768px) {
         padding: 11px 16px 6px 15px;
     }
@@ -2954,6 +3011,7 @@ input[type='search']::-webkit-search-results-decoration {
     &__main {
         padding: 0 20px 0 14px;
         width: calc(100% - 28px);
+        z-index: 10;
     }
 
     &__subline {
@@ -2970,6 +3028,8 @@ input[type='search']::-webkit-search-results-decoration {
         border-bottom-right-radius: calc(var(--block-border-radius) / 4);
         border-top-right-radius: calc(var(--block-border-radius) / 4);
         padding: 5px 0;
+        z-index: 10;
+
         &:hover {
             background: #100f13;
 
@@ -3049,6 +3109,7 @@ input[type='search']::-webkit-search-results-decoration {
             align-items: center;
             justify-content: center;
             @include button-effect-innactive;
+            z-index: 10;
             // transition: 0.3s;
             // opacity: 0.6;
 
@@ -3538,7 +3599,7 @@ input[type='search']::-webkit-search-results-decoration {
     background: #131315;
     height: 55px;
     align-items: center;
-
+    z-index: 21;
     @include unselectable;
     &__item {
         flex: auto;
