@@ -1,12 +1,12 @@
 /* eslint-disable */
 
-const express = require('express')
-const fs = require('fs')
-const path = require('path')
-const cors = require('cors')
-const podcastFeedParser = require('podcast-feed-parser')
-const { MongoClient } = require('mongodb')
-const csvToJson = require('convert-csv-to-json')
+import express from 'express'
+import { readdir } from 'fs'
+import { join } from 'path'
+import cors from 'cors'
+import { getPodcastFromURL } from 'podcast-feed-parser'
+import { MongoClient } from 'mongodb'
+import { fieldDelimiter } from 'convert-csv-to-json'
 
 const mongoUrl =
     'mongodb+srv://tarasowalentin:Xy6EnM4ZGibsYKn@cluster0.7saxp.mongodb.net/newochem?retryWrites=true&w=majority'
@@ -96,7 +96,7 @@ async function getEpisodesArrayFromRSS() {
             ],
         },
     }
-    const rss = await podcastFeedParser.getPodcastFromURL(RSS_URL, options)
+    const rss = await getPodcastFromURL(RSS_URL, options)
     let episodes = rss.episodes
 
     for (let i = 0; i < episodes.length; i++) {
@@ -117,10 +117,7 @@ async function getEpisodesArrayFromPatreonRSS(isPatron = false) {
             episodes: ['title', 'description', 'pubDate', 'link', 'enclosure'],
         },
     }
-    const rss = await podcastFeedParser.getPodcastFromURL(
-        PATREON_RSS_URL,
-        options
-    )
+    const rss = await getPodcastFromURL(PATREON_RSS_URL, options)
 
     let episodes = rss.episodes
     shortEpisodes = []
@@ -151,13 +148,11 @@ async function getEpisodesArrayFromPatreonRSS(isPatron = false) {
 // getEpisodesArrayFromPatreonRSS()
 async function getPatrons() {
     let patreonJSON = new Promise((resolve, reject) => {
-        const dirpath = path.join(__dirname, '/patreon/')
-        return fs.readdir(dirpath, (err, files) => {
+        const dirpath = join(__dirname, '/patreon/')
+        return readdir(dirpath, (err, files) => {
             const csv = files.filter((el) => /\.csv$/.test(el))
             csv.sort((a, b) => b.replace(/[D]+/g, '') - a.replace(/[D]+/g, ''))
-            let json = csvToJson
-                .fieldDelimiter(',')
-                .getJsonFromCsv(dirpath + csv[0])
+            let json = fieldDelimiter(',').getJsonFromCsv(dirpath + csv[0])
 
             resolve(json)
         })
@@ -171,10 +166,11 @@ async function checkIsPatron(email) {
     if (!email) {
         return false
     }
+
     let patrons = await getPatrons()
+    console.log(patrons)
     for (let i = 0; i < patrons.length; i++) {
         const patron = patrons[i]
-        console.log(patron)
         if (patron['Email'].toLowerCase() == email.toLowerCase()) {
             return true
         }

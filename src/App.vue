@@ -64,16 +64,16 @@
                         placeholder="Введите ваш email"
                         @keyup.enter="loginAsPatron"
                     />
-                    <input
+                    <button
                         :disabled="patronLoading"
                         type="submit"
-                        value="Войти"
-                        class="button"
                         @click="loginAsPatron"
-                    />
-                    <div class="patron-message">
-                        {{ patronMessage ?? patronMessage }}
-                    </div>
+                    >
+                        Войти
+                    </button>
+                </div>
+                <div class="patron-message">
+                    {{ patronMessage ?? patronMessage }}
                 </div>
             </div>
         </div>
@@ -314,9 +314,9 @@
                     <div class="playlist">
                         <div class="playlist__header">
                             <input
+                                :title="playlistName"
                                 ref="playlistName"
                                 v-model="playlistName"
-                                :title="playlistName"
                                 type="text"
                                 placeholder="Название плейлиста"
                                 class="playlist__heading"
@@ -334,10 +334,7 @@
                                 >Сохранить</span
                             >
 
-                            <div
-                                class="playlist__btns"
-                                v-if="playlist.length > 0"
-                            >
+                            <div class="playlist__btns">
                                 <span
                                     title="Перемешать"
                                     v-if="
@@ -351,7 +348,7 @@
                                         iconClass="playlist__shuffle"
                                     />
                                 </span>
-                                <span
+                                <!-- <span
                                     v-if="!savePlaylistLineActive"
                                     title="Очистить плейлист"
                                 >
@@ -360,8 +357,11 @@
                                         :clickIcon="emptyPlaylist"
                                         iconClass="playlist__shuffle"
                                     />
-                                </span>
-                                <span title="Сохранить плейлист">
+                                </span> -->
+                                <span
+                                    title="Сохранить плейлист"
+                                    v-if="playlist.length != 0"
+                                >
                                     <addSVG
                                         icon="save"
                                         :clickIcon="toggleSavePlaylistLine"
@@ -375,12 +375,21 @@
                                         iconClass="playlist__save-btn"
                                     />
                                 </span>
-                                <!-- <span v-if="!savePlaylistLineActive">
+                                <span
+                                    v-if="
+                                        !savePlaylistLineActive &&
+                                        playlist.length != 0
+                                    "
+                                    @click="
+                                        showPlaylistShare = !showPlaylistShare
+                                    "
+                                    title="Поделиться"
+                                >
                                     <addSVG
                                         icon="share"
                                         iconClass="playlist__shuffle"
                                     />
-                                </span> -->
+                                </span>
                                 <span
                                     v-if="isMobile && !savePlaylistLineActive"
                                 >
@@ -392,7 +401,116 @@
                                 </span>
                             </div>
                         </div>
+                        <div
+                            class="share__playlist-links"
+                            v-show="showPlaylistShare"
+                        >
+                            <a
+                                class="subline__item interactive"
+                                :href="
+                                    'https://t.me/share/url?url=' +
+                                    siteURL +
+                                    '/?playlist=' +
+                                    playlist
+                                        .map((track) => {
+                                            if (track && track.id) {
+                                                return track.id
+                                            }
+                                        })
+                                        .join('-') +
+                                    '&playlistName=' +
+                                    encodeURI(playlistName) +
+                                    '&amp;text=' +
+                                    encodeURI(playlistName)
+                                "
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <addSVG icon="share-tg" />
 
+                                Telegram</a
+                            >
+                            <a
+                                class="subline__item interactive"
+                                :href="
+                                    'http://vk.com/share.php?url=' +
+                                    siteURL +
+                                    '/?playlist=' +
+                                    playlist
+                                        .map((track) => {
+                                            if (track && track.id) {
+                                                return track.id
+                                            }
+                                        })
+                                        .join('-') +
+                                    '&playlistName=' +
+                                    encodeURI(playlistName) +
+                                    '&amp;tittle=' +
+                                    encodeURI(playlistName)
+                                "
+                                target="_blank"
+                            >
+                                <addSVG icon="share-vk" />
+
+                                VK</a
+                            >
+                            <a
+                                class="subline__item interactive"
+                                :href="
+                                    'https://www.facebook.com/sharer/sharer.php?u=' +
+                                    siteURL +
+                                    '/?playlist=' +
+                                    playlist
+                                        .map((track) => {
+                                            if (track && track.id) {
+                                                return track.id
+                                            }
+                                        })
+                                        .join('-') +
+                                    '&playlistName=' +
+                                    encodeURI(playlistName) +
+                                    '&amp;t=' +
+                                    encodeURI(playlistName)
+                                "
+                                target="_blank"
+                            >
+                                <addSVG icon="share-fb" />
+
+                                Facebook</a
+                            >
+                            <a
+                                class="subline__item interactive"
+                                :href="
+                                    'https://twitter.com/intent/tweet?text=' +
+                                    encodeURI(playlistName) +
+                                    '%20' +
+                                    siteURL +
+                                    '/?playlist=' +
+                                    playlist
+                                        .map((track) => {
+                                            if (track && track.id) {
+                                                return track.id
+                                            }
+                                        })
+                                        .join('-') +
+                                    '&playlistName=' +
+                                    encodeURI(playlistName)
+                                "
+                                target="_blank"
+                            >
+                                <addSVG icon="share-tw" />
+
+                                Twitter</a
+                            >
+                            <!-- <span
+                                @click="copy(siteURL, $event.target)"
+                                class="copy-el subline__item interactive"
+                            >
+                                <addSVG icon="copy" /><span class="text">
+                                    Скопировать ссылку</span
+                                ></span
+                            > -->
+                        </div>
                         <div class="playlist__tracklist">
                             <template v-if="playlist.length != 0">
                                 <draggable
@@ -415,6 +533,29 @@
                                                     playlist-track
                                                 "
                                             >
+                                                <div
+                                                    class="
+                                                        playlist-track__time-container
+                                                    "
+                                                >
+                                                    <div
+                                                        class="
+                                                            playlist-track__time
+                                                        "
+                                                        :style="{
+                                                            width: listenedEpisodes[
+                                                                track.id
+                                                            ]
+                                                                ? (listenedEpisodes[
+                                                                      track.id
+                                                                  ] *
+                                                                      100) /
+                                                                      track.duration +
+                                                                  '%'
+                                                                : '0%',
+                                                        }"
+                                                    ></div>
+                                                </div>
                                                 <div
                                                     class="playlist-track__play"
                                                     @click="
@@ -467,7 +608,7 @@
                                                     <addSVG icon="open" />
                                                 </div>
                                                 <div
-                                                    title="Переместить"
+                                                    title="Перетащить"
                                                     class="
                                                         playlist-track__handle
                                                         handle
@@ -516,12 +657,21 @@
                                     {{ formatDuration(playlistDuration) }}
                                 </template>
                             </span>
-                            <span
-                                class="playlist__make-empty"
-                                @click="togglePlaylist"
-                            >
-                                Выключить плейлист
-                            </span>
+                            <div class="playlist__bottom-btns">
+                                <span
+                                    class="playlist__make-empty"
+                                    @click="emptyPlaylist"
+                                    v-if="playlist.length"
+                                >
+                                    Очистить
+                                </span>
+                                <span
+                                    class="playlist__make-empty"
+                                    @click="togglePlaylist"
+                                >
+                                    Закрыть
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1363,6 +1513,7 @@ export default {
             mousepress: false,
             mousepressVolume: false,
             playlist: [],
+            showPlaylistShare: false,
             playlistDuration: 0,
             userPlaylists: [],
             showDonateModal: false,
@@ -1629,6 +1780,7 @@ export default {
                 })
             }
         },
+
         checkIsMobile() {
             this.windowWidth = window.innerWidth
             this.isMobile = this.windowWidth > 768 ? false : true
@@ -1661,18 +1813,19 @@ export default {
             this.zPlayerInit()
         },
         zPlayerInit() {
-            if (!this.zPlayer.id && this.episodes.length) {
-                this.player.api('file', 'id:' + this.episodes[0].id)
-                this.player.api('pause')
-            } else {
-                this.player.api('file', 'id:' + this.zPlayer.id)
-                this.player.api('pause')
-            }
+            setTimeout(() => {
+                if (!this.zPlayer.id) {
+                    this.player.api('file', 'id:' + this.episodes[0].id)
+                    this.player.api('pause')
+                } else {
+                    this.player.api('file', 'id:' + this.zPlayer.id)
+                    this.player.api('pause')
+                }
+            }, 0)
 
             this.playerNode.addEventListener('new', () => {
                 this.zPlayer.id = this.player.api('playlist_id')
                 this.zPlayer.title = this.player.api('playlist_title')
-                this.zPlayer.duration = 0
 
                 this.player.api('volume', this.zPlayer.volume)
                 let index = this.openedShare.indexOf(this.zPlayer.id)
@@ -1680,21 +1833,38 @@ export default {
                     this.openedShare = []
                     this.openedShare.push(this.zPlayer.id)
                 }
+                this.zPlayer.duration = 0
                 this.playerNode.addEventListener('duration', (e) => {
                     this.zPlayer.duration = e.info
                 })
+
                 document.title = this.zPlayer.title
             })
 
             this.playerNode.addEventListener('play', () => {
-                this.zPlayer.isPlaying = true
                 if (this.listenedEpisodes[this.zPlayer.id]) {
-                    console.log('aaaasdasdsadsad')
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            if (this.zPlayer.duration) {
+                                let listenedPercent =
+                                    (this.listenedEpisodes[this.zPlayer.id] *
+                                        100) /
+                                    this.zPlayer.duration
+                                if (listenedPercent > 98) {
+                                    this.player.api('seek', '0')
+                                }
+                            }
+                        }, 1000)
+                    })
+
                     this.player.api(
                         'seek',
                         this.listenedEpisodes[this.zPlayer.id]
                     )
                 }
+                this.zPlayer.isPlaying = true
+                this.player.api('volume', this.zPlayer.volume)
+
                 this.playerNode.addEventListener('time', () => {
                     if (!this.mousepress) {
                         this.zPlayer.time = this.player.api('time')
@@ -1737,6 +1907,9 @@ export default {
         },
         playEpisode(id) {
             if (this.zPlayer.id != id) {
+                if (this.listenedEpisodes[id]) {
+                    this.player.api('volume', 0)
+                }
                 this.player.api('play', 'id:' + id)
             } else {
                 this.player.api('toggle')
@@ -1870,8 +2043,9 @@ export default {
                     urlParams.set('ep', id)
                     const url = new URL(location)
                     url.search = urlParams
-                    history.pushState(null, document.title, url)
+                    history.pushState(null, this.sharedTrack.title, url)
                 }
+                document.title = this.sharedTrack.title
             }
         },
         toggleSearch() {
@@ -2297,6 +2471,7 @@ export default {
             this.emptyPlaylist()
             this.openPlaylist()
             this.playlistsShow()
+            this.playlistName = ''
             if (!this.isMobile) {
                 this.playlistVisible = true
             } else {
@@ -2990,6 +3165,8 @@ input[type='search']::-webkit-search-results-decoration {
 
         svg {
             fill: transparent;
+            width: 28px;
+            height: 28px;
             path {
                 fill: #fff;
             }
@@ -3336,6 +3513,36 @@ input[type='search']::-webkit-search-results-decoration {
             }
         }
     }
+    &__playlist-links {
+        padding: 0 0 10px 0;
+        z-index: 90;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        flex-wrap: wrap;
+        a,
+        > span {
+            padding: 6px 20px 6px 0;
+            z-index: 90;
+            text-decoration: none;
+            display: block;
+            white-space: nowrap;
+            display: flex;
+            font-size: 12px;
+            color: #fff;
+            cursor: pointer;
+
+            // &:first-child {
+            //   padding-left: 4px;
+            // }
+            svg {
+                height: 18px;
+                width: 18px;
+                fill: #fff !important;
+                margin-right: 6px;
+            }
+        }
+    }
 }
 
 .zPlayer {
@@ -3361,7 +3568,7 @@ input[type='search']::-webkit-search-results-decoration {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 10px 26px;
+        padding: 10px 22px;
         box-sizing: border-box;
         @media (max-width: 768px) {
             padding: 12px 15px 12px;
@@ -3684,9 +3891,9 @@ input[type='search']::-webkit-search-results-decoration {
         z-index: 999;
         // max-width: 100%;
         top: auto;
-        left: 0;
-        right: 0;
-        bottom: 130px;
+        left: 5px;
+        right: 5px;
+        bottom: 100px;
         padding: 10px 15px 15px;
 
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.486);
@@ -3723,6 +3930,10 @@ input[type='search']::-webkit-search-results-decoration {
         // border: 1px solid transparent;
         // border-radius: var(--block-border-radius);
         flex: auto;
+
+        &::after {
+            content: '';
+        }
     }
 
     .active {
@@ -3736,6 +3947,9 @@ input[type='search']::-webkit-search-results-decoration {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        @media (max-width: 768px) {
+            margin-top: 0px;
+        }
     }
 
     &__btns {
@@ -3804,7 +4018,12 @@ input[type='search']::-webkit-search-results-decoration {
         text-align: right;
         margin-top: 14px;
         margin-left: 8px;
+
         @include unselectable;
+    }
+
+    &__bottom-btns {
+        display: flex;
     }
 
     &__duration {
@@ -3814,8 +4033,8 @@ input[type='search']::-webkit-search-results-decoration {
     }
 
     &__make-empty {
-        margin-left: 0;
-        cursor: default;
+        margin-left: 6px;
+        cursor: pointer;
         @include button-effect;
     }
 
@@ -3918,6 +4137,7 @@ input[type='search']::-webkit-search-results-decoration {
         width: fit-content;
         overflow: hidden;
         flex: auto;
+        z-index: 10;
     }
     &__open,
     &__handle,
@@ -3953,8 +4173,8 @@ input[type='search']::-webkit-search-results-decoration {
     }
     &__open {
         svg {
-            width: 12px;
-            height: 12px;
+            width: 13px;
+            height: 13px;
             fill: #fff;
         }
     }
@@ -3969,6 +4189,24 @@ input[type='search']::-webkit-search-results-decoration {
             position: unset;
             margin-left: 10px;
         }
+    }
+
+    &__time-container {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        // border-radius: var(--block-border-radius);
+        overflow: hidden;
+    }
+
+    &__time {
+        position: absolute;
+        height: 100%;
+        background: rgb(74 70 88 / 19%);
+        top: 0;
+        left: 0;
     }
 }
 
@@ -4106,7 +4344,7 @@ input[type='search']::-webkit-search-results-decoration {
     &__link {
         // width: 50%;
         background: var(--btn-color);
-        padding: 6px 20px 6px 12px;
+        padding: 6px 16px 6px 12px;
         border-radius: calc(var(--block-border-radius) / 2);
         margin-right: 12px;
         margin-bottom: 12px;
@@ -4229,7 +4467,7 @@ input[type='search']::-webkit-search-results-decoration {
     left: 0;
     bottom: 0;
     right: 0;
-    z-index: 99;
+    z-index: 9999;
     display: flex;
     // align-items: center;
     justify-content: center;
@@ -4593,7 +4831,8 @@ input[type='search']::-webkit-search-results-decoration {
 .patron-login {
     display: flex;
     margin: 30px 0;
-    flex-wrap: wrap;
+    // flex-wrap: wrap;
+    justify-content: space-between;
 
     input {
         color: var(--site-bg);
@@ -4602,20 +4841,23 @@ input[type='search']::-webkit-search-results-decoration {
         border-radius: 8px;
         font-size: 14px;
         outline: none;
-        max-width: 300px;
-        width: 100%;
+        flex: auto;
+        margin-right: 10px;
+
+        @media (max-width: 768px) {
+            // max-width: 200px;
+        }
     }
-    .button {
-        width: fit-content;
+    button {
         color: #fff;
         margin: 0;
-        margin-left: 10px;
     }
-    .patron-message {
-        width: 100%;
-        font-size: 16px;
-        margin: 10px 0;
-    }
+}
+
+.patron-message {
+    width: 100%;
+    font-size: 16px;
+    margin: 10px 0;
 }
 
 .patreon-episode {
