@@ -531,13 +531,20 @@
                                                     playing:
                                                         zPlayer.id == track.id,
                                                 }"
-                                                class="playlist__track playlist-track"
+                                                class="
+                                                    playlist__track
+                                                    playlist-track
+                                                "
                                             >
                                                 <div
-                                                    class="playlist-track__time-container"
+                                                    class="
+                                                        playlist-track__time-container
+                                                    "
                                                 >
                                                     <div
-                                                        class="playlist-track__time"
+                                                        class="
+                                                            playlist-track__time
+                                                        "
                                                         :style="{
                                                             width: listenedEpisodes[
                                                                 track.id
@@ -582,7 +589,9 @@
                                                     :title="
                                                         getTitleByID(track.id)
                                                     "
-                                                    class="playlist-track__title"
+                                                    class="
+                                                        playlist-track__title
+                                                    "
                                                     @click="
                                                         playEpisode(track.id)
                                                     "
@@ -603,12 +612,17 @@
                                                 </div>
                                                 <div
                                                     title="Перетащить"
-                                                    class="playlist-track__handle handle"
+                                                    class="
+                                                        playlist-track__handle
+                                                        handle
+                                                    "
                                                 >
                                                     <addSVG icon="drag" />
                                                 </div>
                                                 <div
-                                                    class="playlist-track__duration"
+                                                    class="
+                                                        playlist-track__duration
+                                                    "
                                                 >
                                                     {{
                                                         toHHMMSS(track.duration)
@@ -616,7 +630,9 @@
                                                 </div>
                                                 <div
                                                     title="Убрать из плейлиста"
-                                                    class="playlist-track__remove"
+                                                    class="
+                                                        playlist-track__remove
+                                                    "
                                                     @click="
                                                         toggleTrackInPlaylist(
                                                             track
@@ -970,7 +986,10 @@
                                         (!item.patreon || isPatron)
                                     "
                                     @click="toggleTrackInPlaylist(item)"
-                                    class="subline__item episode__add-to-playlist"
+                                    class="
+                                        subline__item
+                                        episode__add-to-playlist
+                                    "
                                 >
                                     <!-- <addSVG icon="playlist-add" />  -->
                                     <span class="nowrap">
@@ -1057,9 +1076,8 @@
                                     class="subline__item episode__share share"
                                     @click="toggleShare(item.id)"
                                     :class="{
-                                        episode__about_active: openedShare.includes(
-                                            item.id
-                                        ),
+                                        episode__about_active:
+                                            openedShare.includes(item.id),
                                     }"
                                 >
                                     <addSVG icon="share" />
@@ -1101,6 +1119,7 @@
                                     encodeURI(item.title)
                                 "
                                 target="_blank"
+                                rel="noopener noreferrer"
                             >
                                 <addSVG icon="share-vk" />
 
@@ -1307,6 +1326,7 @@
                                 :showIconIf="this.zPlayer.isPlaying"
                             />
                         </div>
+
                         <div
                             class="zPlayer__next"
                             :class="{
@@ -1317,10 +1337,23 @@
                         >
                             <addSVG icon="next-track" />
                         </div>
+
+                        <div
+                            class="zPlayer__loading"
+                            :class="zPlayer.isLoading ? 'show' : ''"
+                        >
+                            <div class="lds-ring">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                        </div>
                         <div class="zPlayer__title">
                             {{ this.zPlayer.title }}
                         </div>
                         <div
+                            v-if="this.zPlayer.id"
                             class="zPlayer__open"
                             @click="showSharedTrack(this.zPlayer.id)"
                         >
@@ -1478,6 +1511,7 @@ export default {
                 mouseOverPx: null,
                 clientX: null,
                 isPlaying: false,
+                isLoading: false,
                 volume: 0.8,
                 speed: 1,
                 buffered: 0,
@@ -1523,26 +1557,24 @@ export default {
             patronLoading: false,
         }
     },
-    created() {},
-    mounted() {
-        this.setPropFromLocalStorage('patronEmail')
-        this.setPropFromLocalStorage('isPatron')
+    created() {
+        this.addPlayerJS()
         this.setPropFromLocalStorage('episodes')
         if (this.episodes.length) {
             this.paging()
-            this.addPlayerJS()
         }
-
-        this.setEpisodes()
-
-        this.checkIsMobile()
-
+        this.setPropFromLocalStorage('patronEmail')
+        this.setPropFromLocalStorage('isPatron')
         this.setURLData()
-
+        this.setEpisodes()
         this.setPropFromLocalStorage('listenedEpisodes')
         this.setPropFromLocalStorage('userPlalists')
         this.setPropFromLocalStorage('zPlayer')
         this.zPlayer.isPlaying = false
+        this.zPlayer.isLoading = false
+    },
+    mounted() {
+        this.checkIsMobile()
 
         window.onresize = () => {
             this.checkIsMobile()
@@ -1585,7 +1617,7 @@ export default {
             handler(newVal) {
                 localStorage.setItem('episodes', JSON.stringify(newVal))
 
-                if (this.URLData.ep) {
+                if (this.URLData && this.URLData.ep) {
                     this.sharedTrack = this.episodes.find(
                         (x) => x.id == this.URLData.ep
                     )
@@ -1667,16 +1699,10 @@ export default {
     methods: {
         setEpisodes() {
             loadEpisodes(this.patronEmail).then((episodes) => {
-                // if (this.episodes.length != episodes.length || this.isPatron) {
                 this.episodes = episodes
-                this.paging()
                 this.sortByDate()
-                if (!this.player) {
-                    this.addPlayerJS()
-                } else {
-                    this.setPlaylist()
-                }
-                // }
+                this.paging()
+                this.setPlaylist()
             })
         },
         async getPatronsEpisodes() {
@@ -1704,6 +1730,27 @@ export default {
         },
         setPlaylist() {
             this.player.api('file', this.getPlaylist())
+            this.zPlayer.isPlaying = false
+            this.player.api('playlistloop', '1')
+
+            if (this.zPlayer.id) {
+                this.player.api('find', this.zPlayer.id)
+            } else {
+                if (this.isPatron) {
+                    this.player.api('find', this.episodes[0].id)
+                } else {
+                    let avaliableEpisode = this.episodes.find(
+                        (ep) => !ep.patreon
+                    )
+                    if (avaliableEpisode) {
+                        this.player.api('find', avaliableEpisode.id)
+                    }
+                }
+            }
+
+            //             }
+
+            //             }
         },
         async loginAsPatron() {
             this.patronLoading = true
@@ -1749,7 +1796,8 @@ export default {
             this.setEpisodes()
         },
         validateEmail(email) {
-            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            const re =
+                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
             return re.test(String(email).toLowerCase())
         },
         setURLData() {
@@ -1789,7 +1837,6 @@ export default {
         initPlayerJS() {
             this.player = new window.Playerjs({
                 id: 'player',
-                file: this.getPlaylist(),
             })
 
             this.playerNode = document.getElementById('player')
@@ -1800,19 +1847,11 @@ export default {
             this.zPlayerInit()
         },
         zPlayerInit() {
-            setTimeout(() => {
-                if (!this.zPlayer.id) {
-                    this.player.api('file', 'id:' + this.episodes[0].id)
-                    this.player.api('pause')
-                } else {
-                    this.player.api('file', 'id:' + this.zPlayer.id)
-                    this.player.api('pause')
-                }
-            }, 0)
-
             this.playerNode.addEventListener('new', () => {
-                this.zPlayer.id = this.player.api('playlist_id')
-                this.zPlayer.title = this.player.api('playlist_title')
+                setTimeout(() => {
+                    this.zPlayer.id = this.player.api('playlist_id')
+                    this.zPlayer.title = this.player.api('playlist_title')
+                }, 0)
 
                 this.player.api('volume', this.zPlayer.volume)
                 let index = this.openedShare.indexOf(this.zPlayer.id)
@@ -1824,25 +1863,23 @@ export default {
                 this.playerNode.addEventListener('duration', (e) => {
                     this.zPlayer.duration = e.info
                 })
-
-                document.title = this.zPlayer.title
+                if (this.zPlayer.title) {
+                    document.title = this.zPlayer.title
+                }
             })
 
             this.playerNode.addEventListener('play', () => {
                 if (this.listenedEpisodes[this.zPlayer.id]) {
-                    this.$nextTick(() => {
-                        setTimeout(() => {
-                            if (this.zPlayer.duration) {
-                                let listenedPercent =
-                                    (this.listenedEpisodes[this.zPlayer.id] *
-                                        100) /
-                                    this.zPlayer.duration
-                                if (listenedPercent > 98) {
-                                    this.player.api('seek', '0')
-                                }
+                    setTimeout(() => {
+                        if (this.zPlayer.duration) {
+                            let listenedPercent =
+                                (this.listenedEpisodes[this.zPlayer.id] * 100) /
+                                this.zPlayer.duration
+                            if (listenedPercent > 98) {
+                                this.player.api('seek', '0')
                             }
-                        }, 1000)
-                    })
+                        }
+                    }, 1000)
 
                     this.player.api(
                         'seek',
@@ -1856,11 +1893,12 @@ export default {
                     if (!this.mousepress) {
                         this.zPlayer.time = this.player.api('time')
                         if (Math.floor(this.zPlayer.time) != 0) {
-                            this.listenedEpisodes[
-                                this.zPlayer.id
-                            ] = this.zPlayer.time
+                            this.listenedEpisodes[this.zPlayer.id] =
+                                this.zPlayer.time
                         }
                     }
+                    this.zPlayer.isLoading = false
+
                     this.zPlayer.buffered = this.player.api('buffered')
 
                     if (
@@ -1874,6 +1912,9 @@ export default {
             })
             this.playerNode.addEventListener('pause', () => {
                 this.zPlayer.isPlaying = false
+            })
+            this.playerNode.addEventListener('waiting', () => {
+                this.zPlayer.isLoading = true
             })
         },
         zPlayerToggle() {
@@ -2219,7 +2260,8 @@ export default {
             return `${day} ${months[numerOfMonth]} ${year}`
         },
         formatDescriprion(text) {
-            var re = /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\\/%?=~_()|!:,.;]*[-a-z0-9+&@#/%=~_()|])/gi
+            var re =
+                /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\\/%?=~_()|!:,.;]*[-a-z0-9+&@#/%=~_()|])/gi
             return text.replace(re, function (match, lParens, url) {
                 var rParens = ''
                 lParens = lParens || ''
@@ -3563,6 +3605,7 @@ input[type='search']::-webkit-search-results-decoration {
         display: flex;
         align-items: center;
         flex: auto;
+        position: relative;
     }
     &__main-right {
         display: flex;
@@ -3574,6 +3617,7 @@ input[type='search']::-webkit-search-results-decoration {
         cursor: pointer;
         width: 35px;
         margin-right: 6px;
+        z-index: 20;
 
         @include button-effect;
 
@@ -3581,6 +3625,45 @@ input[type='search']::-webkit-search-results-decoration {
             fill: #fff;
             width: 30px;
             height: 30px;
+        }
+    }
+
+    &__loading {
+        position: absolute;
+        left: -9px;
+        top: -10px;
+        z-index: 10;
+        opacity: 0;
+        visibility: hidden;
+        transition: 0.1s;
+
+        .lds-ring {
+            display: inline-block;
+            position: relative;
+            width: 42px;
+            height: 42px;
+            opacity: 0.4;
+        }
+        .lds-ring div {
+            box-sizing: border-box;
+            display: block;
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            margin: 4px;
+            border: 4px solid rgb(44, 44, 44);
+            border-radius: 50%;
+            animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            border-color: rgb(70, 70, 70) transparent transparent transparent;
+        }
+        .lds-ring div:nth-child(1) {
+            animation-delay: -0.45s;
+        }
+        .lds-ring div:nth-child(2) {
+            animation-delay: -0.3s;
+        }
+        .lds-ring div:nth-child(3) {
+            animation-delay: -0.15s;
         }
     }
 
@@ -4875,5 +4958,10 @@ input[type='search']::-webkit-search-results-decoration {
     &:hover {
         opacity: 1;
     }
+}
+
+.show {
+    opacity: 1;
+    visibility: visible;
 }
 </style>

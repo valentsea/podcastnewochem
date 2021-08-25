@@ -7,4 +7,5 @@ module.exports = {
 
         svgRule.use('html-loader').loader('html-loader')
     },
+    productionSourceMap: false,
 }
