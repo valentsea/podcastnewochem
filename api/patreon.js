@@ -8,8 +8,8 @@ const accessToken = 'Y_2nC0iIO7Hy5PEnfpzJzNMnlEovrrIo584LmDfEWag' // Replace wit
 
 const patreonAPIClient = patreonAPI(accessToken)
 patreonAPIClient('/campaigns/1543693/pledges')
-    .then((store) => {
-        console.log(store.store.graph)
+    .then(({ store }) => {
+        console.log(store.findAll('reward'))
         return store
     })
     .then((data) => {

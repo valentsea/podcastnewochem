@@ -91,7 +91,7 @@
                             :src="podcast.image"
                             width="200"
                             height="53"
-                            :alt="podcast.title"
+                            :alt="podcast.name"
                         />
                     </div>
 
@@ -449,6 +449,7 @@
                                     encodeURI(playlistName)
                                 "
                                 target="_blank"
+                                rel="noopener noreferrer"
                             >
                                 <addSVG icon="share-vk" />
 
@@ -473,6 +474,7 @@
                                     encodeURI(playlistName)
                                 "
                                 target="_blank"
+                                rel="noopener noreferrer"
                             >
                                 <addSVG icon="share-fb" />
 
@@ -497,6 +499,7 @@
                                     encodeURI(playlistName)
                                 "
                                 target="_blank"
+                                rel="noopener noreferrer"
                             >
                                 <addSVG icon="share-tw" />
 
@@ -528,20 +531,13 @@
                                                     playing:
                                                         zPlayer.id == track.id,
                                                 }"
-                                                class="
-                                                    playlist__track
-                                                    playlist-track
-                                                "
+                                                class="playlist__track playlist-track"
                                             >
                                                 <div
-                                                    class="
-                                                        playlist-track__time-container
-                                                    "
+                                                    class="playlist-track__time-container"
                                                 >
                                                     <div
-                                                        class="
-                                                            playlist-track__time
-                                                        "
+                                                        class="playlist-track__time"
                                                         :style="{
                                                             width: listenedEpisodes[
                                                                 track.id
@@ -586,9 +582,7 @@
                                                     :title="
                                                         getTitleByID(track.id)
                                                     "
-                                                    class="
-                                                        playlist-track__title
-                                                    "
+                                                    class="playlist-track__title"
                                                     @click="
                                                         playEpisode(track.id)
                                                     "
@@ -609,17 +603,12 @@
                                                 </div>
                                                 <div
                                                     title="Перетащить"
-                                                    class="
-                                                        playlist-track__handle
-                                                        handle
-                                                    "
+                                                    class="playlist-track__handle handle"
                                                 >
                                                     <addSVG icon="drag" />
                                                 </div>
                                                 <div
-                                                    class="
-                                                        playlist-track__duration
-                                                    "
+                                                    class="playlist-track__duration"
                                                 >
                                                     {{
                                                         toHHMMSS(track.duration)
@@ -627,9 +616,7 @@
                                                 </div>
                                                 <div
                                                     title="Убрать из плейлиста"
-                                                    class="
-                                                        playlist-track__remove
-                                                    "
+                                                    class="playlist-track__remove"
                                                     @click="
                                                         toggleTrackInPlaylist(
                                                             track
@@ -983,10 +970,7 @@
                                         (!item.patreon || isPatron)
                                     "
                                     @click="toggleTrackInPlaylist(item)"
-                                    class="
-                                        subline__item
-                                        episode__add-to-playlist
-                                    "
+                                    class="subline__item episode__add-to-playlist"
                                 >
                                     <!-- <addSVG icon="playlist-add" />  -->
                                     <span class="nowrap">
@@ -1062,6 +1046,7 @@
                                 <a
                                     href="https://www.patreon.com/join/newochem?"
                                     target="_blank"
+                                    rel="noopener noreferrer"
                                     v-if="item.patreon && !isPatron"
                                     class="subline__item episode__about"
                                 >
@@ -1072,8 +1057,9 @@
                                     class="subline__item episode__share share"
                                     @click="toggleShare(item.id)"
                                     :class="{
-                                        episode__about_active:
-                                            openedShare.includes(item.id),
+                                        episode__about_active: openedShare.includes(
+                                            item.id
+                                        ),
                                     }"
                                 >
                                     <addSVG icon="share" />
@@ -1131,6 +1117,7 @@
                                     encodeURI(item.title)
                                 "
                                 target="_blank"
+                                rel="noopener noreferrer"
                             >
                                 <addSVG icon="share-fb" />
 
@@ -1147,6 +1134,7 @@
                                     item.id
                                 "
                                 target="_blank"
+                                rel="noopener noreferrer"
                             >
                                 <addSVG icon="share-tw" />
 
@@ -1761,8 +1749,7 @@ export default {
             this.setEpisodes()
         },
         validateEmail(email) {
-            const re =
-                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
             return re.test(String(email).toLowerCase())
         },
         setURLData() {
@@ -1869,8 +1856,9 @@ export default {
                     if (!this.mousepress) {
                         this.zPlayer.time = this.player.api('time')
                         if (Math.floor(this.zPlayer.time) != 0) {
-                            this.listenedEpisodes[this.zPlayer.id] =
-                                this.zPlayer.time
+                            this.listenedEpisodes[
+                                this.zPlayer.id
+                            ] = this.zPlayer.time
                         }
                     }
                     this.zPlayer.buffered = this.player.api('buffered')
@@ -2231,8 +2219,7 @@ export default {
             return `${day} ${months[numerOfMonth]} ${year}`
         },
         formatDescriprion(text) {
-            var re =
-                /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\\/%?=~_()|!:,.;]*[-a-z0-9+&@#/%=~_()|])/gi
+            var re = /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\\/%?=~_()|!:,.;]*[-a-z0-9+&@#/%=~_()|])/gi
             return text.replace(re, function (match, lParens, url) {
                 var rParens = ''
                 lParens = lParens || ''
@@ -2665,8 +2652,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
 :root {
     // --site-bg: #100f13;
     --site-bg: #010101;
@@ -3007,7 +2992,7 @@ input[type='search']::-webkit-search-results-decoration {
     }
 
     &__btn {
-        padding: 5px 20px;
+        padding: 4px 20px 6px;
         border-radius: var(--block-border-radius);
         width: fit-content;
         position: relative;
@@ -3787,7 +3772,7 @@ input[type='search']::-webkit-search-results-decoration {
 .credits {
     display: block;
     font-size: 11px;
-    opacity: 0.3;
+    opacity: 0.7;
     transition: opacity 0.3s;
     padding-bottom: 10px;
     &:hover {
@@ -4320,7 +4305,7 @@ input[type='search']::-webkit-search-results-decoration {
 }
 
 .patreon {
-    background: #ff424d;
+    background: #d32832;
     font-weight: 600;
     // color: #141518;
     margin-right: 8px;
