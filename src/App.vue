@@ -282,8 +282,6 @@
                     </a>
 
                     <span class="credits">
-                        Мы не собираем ваши персональные данные.
-                        <br />
                         Сайт разработал
                         <a
                             href="https://tarasowalentin.com"
@@ -531,20 +529,13 @@
                                                     playing:
                                                         zPlayer.id == track.id,
                                                 }"
-                                                class="
-                                                    playlist__track
-                                                    playlist-track
-                                                "
+                                                class="playlist__track playlist-track"
                                             >
                                                 <div
-                                                    class="
-                                                        playlist-track__time-container
-                                                    "
+                                                    class="playlist-track__time-container"
                                                 >
                                                     <div
-                                                        class="
-                                                            playlist-track__time
-                                                        "
+                                                        class="playlist-track__time"
                                                         :style="{
                                                             width: listenedEpisodes[
                                                                 track.id
@@ -589,9 +580,7 @@
                                                     :title="
                                                         getTitleByID(track.id)
                                                     "
-                                                    class="
-                                                        playlist-track__title
-                                                    "
+                                                    class="playlist-track__title"
                                                     @click="
                                                         playEpisode(track.id)
                                                     "
@@ -612,17 +601,12 @@
                                                 </div>
                                                 <div
                                                     title="Перетащить"
-                                                    class="
-                                                        playlist-track__handle
-                                                        handle
-                                                    "
+                                                    class="playlist-track__handle handle"
                                                 >
                                                     <addSVG icon="drag" />
                                                 </div>
                                                 <div
-                                                    class="
-                                                        playlist-track__duration
-                                                    "
+                                                    class="playlist-track__duration"
                                                 >
                                                     {{
                                                         toHHMMSS(track.duration)
@@ -630,9 +614,7 @@
                                                 </div>
                                                 <div
                                                     title="Убрать из плейлиста"
-                                                    class="
-                                                        playlist-track__remove
-                                                    "
+                                                    class="playlist-track__remove"
                                                     @click="
                                                         toggleTrackInPlaylist(
                                                             track
@@ -916,9 +898,7 @@
                         </div>
                     </template>
                 </div>
-                <template
-                    v-if="podcastDisplayedEpisodes.length && showEpisodes"
-                >
+                <template v-if="displayedEpisodes.length && showEpisodes">
                     <div
                         class="tracks__episode episode"
                         :class="{
@@ -927,7 +907,7 @@
                             'patreon-bg': item.patreon && !isPatron,
                         }"
                         :id="item.id"
-                        v-for="item in podcastDisplayedEpisodes"
+                        v-for="item in displayedEpisodes"
                         :key="item.id"
                     >
                         <div class="episode__time-container">
@@ -986,10 +966,7 @@
                                         (!item.patreon || isPatron)
                                     "
                                     @click="toggleTrackInPlaylist(item)"
-                                    class="
-                                        subline__item
-                                        episode__add-to-playlist
-                                    "
+                                    class="subline__item episode__add-to-playlist"
                                 >
                                     <!-- <addSVG icon="playlist-add" />  -->
                                     <span class="nowrap">
@@ -1076,8 +1053,9 @@
                                     class="subline__item episode__share share"
                                     @click="toggleShare(item.id)"
                                     :class="{
-                                        episode__about_active:
-                                            openedShare.includes(item.id),
+                                        episode__about_active: openedShare.includes(
+                                            item.id
+                                        ),
                                     }"
                                 >
                                     <addSVG icon="share" />
@@ -1226,7 +1204,7 @@
                 </template>
                 <template
                     v-if="
-                        podcastDisplayedEpisodes.length == 0 &&
+                        displayedEpisodes.length == 0 &&
                         showEpisodes &&
                         episodes.length
                     "
@@ -1465,6 +1443,7 @@ export default {
         return {
             podcast: podcastJSON,
             episodes: [],
+            displayedEpisodes: [],
             siteURL: window.location.origin,
             URLData: null,
             sharedTrack: null,
@@ -1472,34 +1451,7 @@ export default {
             showEpisodes: true,
             player: null,
             playerNode: null,
-            plylsts: [
-                {
-                    name: 'Тим Урбан. История под названием МЫ',
-                    img: './img/playlists/tim-urban.png',
-
-                    episodes: [273, 283, 284, 294, 307, 311, 331, 361],
-                },
-                {
-                    name: 'Интересное про COVID',
-                    img: './img/playlists/covid.jpg',
-                    episodes: [313, 298, 296, 295, 276],
-                },
-                {
-                    name: 'Искусственный интеллект',
-                    img: './img/playlists/AI.jpg',
-                    episodes: [353, 285, 262, 229, 214, 95, 26, 8],
-                },
-                {
-                    name: 'О психиатрии и ментальных расстройствах',
-                    img: './img/playlists/mental-illnes.jpg',
-                    episodes: [350, 327, 309, 289, 240, 235, 206, 40],
-                },
-                {
-                    name: 'Для миллениалов',
-                    img: './img/playlists/millenialsjpg.jpg',
-                    episodes: [272, 268, 203, 194, 160, 77, 37],
-                },
-            ],
+            plylsts: podcastJSON.playlists,
             zPlayer: {
                 id: null,
                 title: null,
@@ -1517,7 +1469,6 @@ export default {
                 buffered: 0,
             },
             listenedEpisodes: {},
-            podcastDisplayedEpisodes: [],
             openedDescriptions: [],
             openedShare: [],
             isSearchActive: false,
@@ -1529,7 +1480,7 @@ export default {
             sortDateDESC: true,
             sortDuration: null,
             showPatronEpisodes: true,
-            episodesPerPage: 40,
+            episodesPerPage: 35,
             page: 1,
             nextPage: false,
             mousepress: false,
@@ -1541,7 +1492,6 @@ export default {
             showDonateModal: false,
             playlistActive: false,
             playlistVisible: false,
-            playlistHeight: this.$refs.playlistBlock,
             isMinimizedInfo: false,
             listenLinksToShow: 5,
             socialLinksToShow: 5,
@@ -1552,6 +1502,7 @@ export default {
             savePlaylistLineActive: false,
             showPatronModal: false,
             patronEmail: null,
+            patronLoginAttempts: 0,
             isPatron: false,
             patronMessage: null,
             patronLoading: false,
@@ -1575,17 +1526,20 @@ export default {
     },
     mounted() {
         this.checkIsMobile()
+        window.addEventListener('resize', this.checkIsMobile())
+        window.addEventListener('scroll', this.updateScrollY())
 
-        window.onresize = () => {
-            this.checkIsMobile()
-        }
-        window.onscroll = () => {
-            this.scrollY = window.scrollY
-        }
         window.addEventListener('popstate', function () {
             window.location.href = location.href
         })
+        // window.addEventListener('popstate', this.updateLocationHref())
         this.addStopOnSpaceListener()
+    },
+    beforeUnmount() {
+        window.removeEventListener('resize', this.checkIsMobile())
+        window.removeEventListener('scroll', this.updateScrollY())
+        // window.removeEventListener('popstate', this.updateLocationHref())
+        document.removeEventListener('keydown', this.addStopOnSpaceListener())
     },
     watch: {
         player: {
@@ -1756,30 +1710,52 @@ export default {
             this.patronLoading = true
             this.patronMessage = null
             if (this.patronEmail && this.validateEmail(this.patronEmail)) {
-                fetch(
-                    `https://podcast.newochem.io/api/isPatron?email=${this.patronEmail}`
-                )
-                    .then((response) => {
-                        return response.json()
-                    })
-                    .then((data) => {
-                        if (!data.isPatron) {
-                            this.patronMessage =
-                                'Нет такого мейла ни у кого из наших патронов :('
-                            this.patronLoading = false
-                        } else {
-                            this.patronMessage = 'Отлично! Вы вошли как патрон.'
-                            this.isPatron = data.isPatron
+                if (this.patronLoginAttempts < 5) {
+                    fetch(
+                        `https://podcast.newochem.io/api/isPatron?email=${this.patronEmail}`
+                    )
+                        .then((response) => {
+                            return response.json()
+                        })
+                        .then((data) => {
+                            if (!data.isPatron) {
+                                this.patronMessage =
+                                    'Нет такого такого патрона с доступом к эксклюзивным выпускам :('
+                                this.patronLoading = false
+                                this.patronLoginAttempts++
+                            } else {
+                                this.patronMessage =
+                                    'Отлично! Вы вошли как патрон.'
+                                this.isPatron = data.isPatron
 
-                            setTimeout(() => {
-                                this.showPatronModal = false
-                            }, 800)
-                            this.setEpisodes()
-                        }
-                    })
-                    .catch((err) => {
-                        console.log(err)
-                    })
+                                setTimeout(() => {
+                                    this.showPatronModal = false
+                                }, 800)
+                                this.setEpisodes()
+                            }
+                        })
+                        .catch((err) => {
+                            console.log(err)
+                        })
+                } else {
+                    this.patronLoading = true
+
+                    let oneMinute = 60
+                    let blockedInterval = setInterval(() => {
+                        this.patronEmail = 'Ждите ' + oneMinute + ' c'
+                        oneMinute--
+                    }, 1000)
+
+                    this.patronMessage =
+                        'Слишком много попыток входа. Подождите минуту...'
+                    setTimeout(() => {
+                        this.patronLoading = false
+                        this.patronLoginAttempts = 0
+                        this.patronMessage = ''
+                        this.patronEmail = ''
+                        clearInterval(blockedInterval)
+                    }, 60000)
+                }
             } else {
                 this.isPatron = false
                 this.patronMessage = 'Неправильный email'
@@ -1796,8 +1772,7 @@ export default {
             this.setEpisodes()
         },
         validateEmail(email) {
-            const re =
-                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
             return re.test(String(email).toLowerCase())
         },
         setURLData() {
@@ -1824,7 +1799,7 @@ export default {
             const script = document.createElement('script')
             script.async = true
             script.src = './js/playerjs.js'
-            document.head.appendChild(script)
+            document.body.appendChild(script)
 
             script.addEventListener(
                 'load',
@@ -1893,8 +1868,9 @@ export default {
                     if (!this.mousepress) {
                         this.zPlayer.time = this.player.api('time')
                         if (Math.floor(this.zPlayer.time) != 0) {
-                            this.listenedEpisodes[this.zPlayer.id] =
-                                this.zPlayer.time
+                            this.listenedEpisodes[
+                                this.zPlayer.id
+                            ] = this.zPlayer.time
                         }
                     }
                     this.zPlayer.isLoading = false
@@ -1919,6 +1895,12 @@ export default {
         },
         zPlayerToggle() {
             this.player.api('toggle')
+        },
+        updateScrollY() {
+            this.scrollY = window.scrollY
+        },
+        updateLocationHref() {
+            window.location.href = location.href
         },
         getPlaylist() {
             const playlist = []
@@ -1963,10 +1945,10 @@ export default {
             let displayItems = this.page * this.episodesPerPage
 
             if (episodes.length > displayItems) {
-                this.podcastDisplayedEpisodes = episodes.slice(0, displayItems)
+                this.displayedEpisodes = episodes.slice(0, displayItems)
                 this.nextPage = true
             } else {
-                this.podcastDisplayedEpisodes = episodes
+                this.displayedEpisodes = episodes
                 this.nextPage = false
             }
         },
@@ -2047,7 +2029,7 @@ export default {
             if (this.sharedTrack) {
                 this.scrollToTop()
 
-                this.podcastDisplayedEpisodes = [this.sharedTrack]
+                this.displayedEpisodes = [this.sharedTrack]
 
                 let index = this.openedDescriptions.indexOf(this.sharedTrack.id)
                 if (index == -1) {
@@ -2260,8 +2242,7 @@ export default {
             return `${day} ${months[numerOfMonth]} ${year}`
         },
         formatDescriprion(text) {
-            var re =
-                /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\\/%?=~_()|!:,.;]*[-a-z0-9+&@#/%=~_()|])/gi
+            var re = /(\(.*?)?\b((?:https?|ftp|file):\/\/[-a-z0-9+&@#\\/%?=~_()|!:,.;]*[-a-z0-9+&@#/%=~_()|])/gi
             return text.replace(re, function (match, lParens, url) {
                 var rParens = ''
                 lParens = lParens || ''
@@ -2717,7 +2698,7 @@ export default {
     }
 }
 @mixin button-effect-innactive {
-    opacity: 0.6;
+    opacity: 0.7;
     transition: 0.3s;
 }
 
@@ -2750,6 +2731,12 @@ br {
 
 a {
     color: var(--link-color);
+}
+
+input:disabled {
+    opacity: 0.4;
+    cursor: default;
+    filter: grayscale(1);
 }
 
 button,
@@ -2846,7 +2833,7 @@ input::-webkit-search-results-decoration {
     }
 
     @media (max-width: 768px) {
-        padding: 20px 30px 30px;
+        padding: 20px 30px 22px;
     }
 
     &__img {

@@ -38,3 +38,23 @@ async function loadPatronEpisodes(patronEmail) {
             return []
         })
 }
+
+// export const loadEpisodes = async (patronEmail) => {
+//     const url = new URL('https://podcast.newochem.io/api/episodes')
+//     if (patronEmail) {
+//         url.searchParams.set('email', patronEmail.toString())
+//     }
+//     return fetch(url)
+//         .then((response) => {
+//             return response.json()
+//         })
+//         .then((data) => {
+//             if (data) {
+//                 return data.episodes
+//             }
+//         })
+//         .catch((err) => {
+//             console.log(err)
+//             return []
+//         })
+// }

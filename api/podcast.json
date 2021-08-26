@@ -98,5 +98,33 @@
         }
     ],
     "fullDescription": "<strong>Суть проекта</strong> <br> Mы ищем самое интересное чтиво в зарубежном интернете. Делаем подборки из пяти статей с краткими описаниями и публикуем их во <a target=\\\"_blank\\\" href=\\\"https://newochem.io/vk\\\">ВКонтакте</a>&nbsp;и&nbsp;<a target=\\\"_blank\\\" href=\\\"https://newochem.io/tg\\\">Телеграме</a>. Вы голосуете за понравившиеся, а мы рерайтим и озвучиваем две, набравшие больше всего голосов.",
-    "mediakitLink": "/files/newochem_mediakit.pdf"
+    "mediakitLink": "/files/newochem_mediakit.pdf",
+    "playlists": [
+        {
+            "name": "Тим Урбан. История под названием МЫ",
+            "img": "./img/playlists/tim-urban.png",
+            "episodes": [273, 283, 284, 294, 307, 311, 331, 361]
+        },
+        {
+            "name": "Интересное про COVID",
+            "img": "./img/playlists/covid.jpg",
+            "episodes": [313, 298, 296, 295, 276]
+        },
+        {
+            "name": "Искусственный интеллект",
+            "img": "./img/playlists/AI.jpg",
+            "episodes": [353, 285, 262, 229, 214, 95, 26, 8]
+        },
+        {
+            "name": "О психиатрии и ментальных расстройствах",
+            "img": "./img/playlists/mental-illnes.jpg",
+            "episodes": [350, 327, 309, 289, 240, 235, 206, 40]
+        },
+        {
+            "name": "Для миллениалов",
+            "img": "./img/playlists/millenialsjpg.jpg",
+            "episodes": [272, 268, 203, 194, 160, 77, 37]
+        }
+    ]
+
 }
